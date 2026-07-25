@@ -473,6 +473,9 @@ const PLU_MAPS = {
     "2945": "Bud Light", "2954": "Bud Light", "2963": "Bud Light", "2972": "Bud Light", "2981": "Bud Light",
     "2947": "Coors Light Btl", "2956": "Coors Light Btl", "2965": "Coors Light Btl", "2974": "Coors Light Btl", "2983": "Coors Light Btl",
     "3036": "Corona", "3040": "Corona", "3044": "Corona", "3048": "Corona", "3052": "Corona",
+    // Heineken bucket PLUs - confirmed present on a real Bucket Bottles report but missing
+    // from this map entirely (a pre-existing gap in Darien's own data, not introduced here).
+    "3038": "Heineken", "3042": "Heineken", "3046": "Heineken", "3050": "Heineken", "3054": "Heineken",
     "2948": "Michelob Ultra", "2957": "Michelob Ultra", "2966": "Michelob Ultra", "2975": "Michelob Ultra", "2984": "Michelob Ultra",
     "2950": "High Life", "2959": "High Life", "2968": "High Life", "2977": "High Life", "2986": "High Life",
     "2951": "Miller Lite", "2960": "Miller Lite", "2969": "Miller Lite", "2978": "Miller Lite", "2987": "Miller Lite",
@@ -686,14 +689,24 @@ async function extractPdfText(file) {
   for (let i = 1; i <= pdf.numPages; i++) {
     const page = await pdf.getPage(i);
     const content = await page.getTextContent();
-    const lines = {};
-    content.items.forEach(item => {
-      const y = Math.round(item.transform[5]);
-      if (!lines[y]) lines[y] = [];
-      lines[y].push(item.str);
-    });
-    const sortedY = Object.keys(lines).map(Number).sort((a, b) => b - a);
-    fullText += sortedY.map(y => lines[y].join(" ")).join("\n") + "\n";
+    // Sort all text items top-to-bottom, then left-to-right, and cluster items into a
+    // row if they're within a small Y tolerance of each other. The previous version
+    // grouped by Math.round(y) exactly - but different columns in a table (numbers vs
+    // text) can render at slightly different sub-pixel Y positions, so an exact-integer
+    // group could split one real row into two fragments, neither of which matches the
+    // parser regex on its own. This silently dropped whole rows (e.g. Modelo, Coors
+    // Light, Miller Lite) with no error or flag, since a row that never became one
+    // line just never gets tested against the regex at all.
+    const items = content.items.map(it => ({ str: it.str, x: it.transform[4], y: it.transform[5] }))
+      .sort((a, b) => (b.y - a.y) || (a.x - b.x));
+    const Y_TOLERANCE = 2.5;
+    const rows = [];
+    for (const it of items) {
+      let row = rows.find(r => Math.abs(r.y - it.y) <= Y_TOLERANCE);
+      if (!row) { row = { y: it.y, items: [] }; rows.push(row); }
+      row.items.push(it);
+    }
+    fullText += rows.map(r => r.items.sort((a, b) => a.x - b.x).map(it => it.str).join(" ")).join("\n") + "\n";
   }
   return fullText;
 }
@@ -750,19 +763,74 @@ function processLiquor(text) {
   for (const [item, oz] of Object.entries(ozByItem)) bottles[item] = Math.round((oz / LIQUOR_BOTTLE_OZ) * 100) / 100;
   return { bottles, flags };
 }
+
+// ───────────────────────── SPECIALTY / MIXED DRINK ENGINE ─────────────────────────
+// Ported from Zazzo's working recipe engine. Darien's app previously had no calculation
+// for mixed drinks at all (see the old placeholder this replaced) — this is why the
+// manual-vs-parser comparison showed a small negative miss across nearly every liquor
+// category: any liquor used in a Martini, Mule, Old Fashioned, etc. was invisible to
+// the parser. Recipe data below is pulled live from Zazzo's real recipe_database table,
+// since these are the same drink recipes served at both locations.
+const RECIPE_DATABASE = [{"drink": "Aperol Spritz", "maps_to_master_item": "Lamarca Splitz", "oz": 1, "tracked": "Yes"}, {"drink": "Aperol Spritz", "maps_to_master_item": "Aperol", "oz": 1, "tracked": "Yes"}, {"drink": "Basil Grapefruit Smash", "maps_to_master_item": "Zazzo's Vodka", "oz": 2, "tracked": "Yes"}, {"drink": "Breakfast Shot", "maps_to_master_item": "Jameson", "oz": 0.75, "tracked": "Yes"}, {"drink": "Chocolate Martini", "maps_to_master_item": "Tippy Cow", "oz": 1, "tracked": "Yes"}, {"drink": "Chocolate Martini", "maps_to_master_item": "Sobieski Vanilla", "oz": 2, "tracked": "Yes"}, {"drink": "Chocolate Peppermint Martini", "maps_to_master_item": "Zazzo's Vodka", "oz": 1.5, "tracked": "Yes"}, {"drink": "Chocolate Peppermint Martini", "maps_to_master_item": "Tippy Cow", "oz": 1, "tracked": "Yes"}, {"drink": "Cinnamon Toast Crunch Shot", "maps_to_master_item": "Fireball Apple", "oz": 0.75, "tracked": "Yes"}, {"drink": "Cinnamon Toast Crunch Shot", "maps_to_master_item": "Rumchata", "oz": 0.25, "tracked": "Yes"}, {"drink": "Colada", "maps_to_master_item": "Zazzo's Rum", "oz": 1.5, "tracked": "Yes"}, {"drink": "Espresso Martini", "maps_to_master_item": "Kahlua", "oz": 0.5, "tracked": "Yes"}, {"drink": "Espresso Martini", "maps_to_master_item": "Sobieski Vanilla", "oz": 1.5, "tracked": "Yes"}, {"drink": "French 75", "maps_to_master_item": "Lamarca Splitz", "oz": 1, "tracked": "Yes"}, {"drink": "French 75", "maps_to_master_item": "Zazzo's Gin", "oz": 0.5, "tracked": "Yes"}, {"drink": "French Martini", "maps_to_master_item": "Zazzo's Vodka", "oz": 1.5, "tracked": "Yes"}, {"drink": "French Martini", "maps_to_master_item": "Chambord", "oz": 0.25, "tracked": "Yes"}, {"drink": "Green Tea Shot", "maps_to_master_item": "Jameson", "oz": 1, "tracked": "Yes"}, {"drink": "Green Tea Shot", "maps_to_master_item": "Peachtree", "oz": 0.5, "tracked": "Yes"}, {"drink": "Irish Mule", "maps_to_master_item": "Jameson", "oz": 1.5, "tracked": "Yes"}, {"drink": "Lemon Drop Martini", "maps_to_master_item": "Sobieski Citron", "oz": 2, "tracked": "Yes"}, {"drink": "Margarita", "maps_to_master_item": "Zazzo's Tequila", "oz": 2, "tracked": "Yes"}, {"drink": "Mimosa", "maps_to_master_item": "Lamarca Splitz", "oz": 3, "tracked": "Yes"}, {"drink": "O-Bomb", "maps_to_master_item": "Zazzo's Vodka", "oz": 1, "tracked": "Yes"}, {"drink": "Original Mule", "maps_to_master_item": "Zazzo's Vodka", "oz": 1.5, "tracked": "Yes"}, {"drink": "Paloma", "maps_to_master_item": "Zazzo's Tequila", "oz": 1.5, "tracked": "Yes"}, {"drink": "Perfect Manhattan", "maps_to_master_item": "Woodford Reserve", "oz": 2, "tracked": "Yes"}, {"drink": "Pineapple Upside Down", "maps_to_master_item": "Zazzo's Vodka", "oz": 2, "tracked": "Yes"}, {"drink": "Pretty in Pink", "maps_to_master_item": "Zazzo's Vodka", "oz": 0.75, "tracked": "Yes"}, {"drink": "Pretty in Pink", "maps_to_master_item": "Peachtree", "oz": 0.5, "tracked": "Yes"}, {"drink": "Pretty in Pink", "maps_to_master_item": "Zazzo's Rum", "oz": 1.25, "tracked": "Yes"}, {"drink": "Red Sangria", "maps_to_master_item": null, "oz": null, "tracked": "No"}, {"drink": "Revolver", "maps_to_master_item": "Bulleit Bourbon", "oz": 3, "tracked": "Yes"}, {"drink": "Revolver", "maps_to_master_item": "Kahlua", "oz": 1, "tracked": "Yes"}, {"drink": "Scooby Snack Shot", "maps_to_master_item": "Midori", "oz": 0.75, "tracked": "Yes"}, {"drink": "Scooby Snack Shot", "maps_to_master_item": "Zazzo's Rum", "oz": 0.75, "tracked": "Yes"}, {"drink": "Smokey Old Fashioned", "maps_to_master_item": "Zazzo's Bourbon", "oz": 2, "tracked": "Yes"}, {"drink": "Sparkling Cosmo", "maps_to_master_item": "Lamarca Splitz", "oz": 1, "tracked": "Yes"}, {"drink": "Sparkling Cosmo", "maps_to_master_item": "Tito's", "oz": 1.5, "tracked": "Yes"}, {"drink": "Taste of Italy", "maps_to_master_item": "Peachtree", "oz": 0.5, "tracked": "Yes"}, {"drink": "Taste of Italy", "maps_to_master_item": "Lamarca Splitz", "oz": 1, "tracked": "Yes"}, {"drink": "Taste of Italy", "maps_to_master_item": "Zazzo's Vodka", "oz": 0.5, "tracked": "Yes"}, {"drink": "The Calvary Old Fashioned", "maps_to_master_item": "Horse Soldier", "oz": 2, "tracked": "Yes"}, {"drink": "The Venetian Spritz", "maps_to_master_item": "Lamarca Splitz", "oz": 1, "tracked": "Yes"}, {"drink": "The Venetian Spritz", "maps_to_master_item": "Select Aperitif", "oz": 1, "tracked": "Yes"}, {"drink": "Thin Mint Shot", "maps_to_master_item": "Tippy Cow", "oz": 1, "tracked": "Yes"}, {"drink": "Thin Mint Shot", "maps_to_master_item": "Rumple Minze", "oz": 0.5, "tracked": "Yes"}, {"drink": "Tiramisu Martini", "maps_to_master_item": "Kahlua", "oz": 0.25, "tracked": "Yes"}, {"drink": "Tiramisu Martini", "maps_to_master_item": "Zazzo's Vodka", "oz": 2, "tracked": "Yes"}, {"drink": "Vegas Bomb", "maps_to_master_item": "Crown Royal", "oz": 1, "tracked": "Yes"}, {"drink": "White Russian", "maps_to_master_item": "Zazzo's Vodka", "oz": 1.25, "tracked": "Yes"}, {"drink": "White Russian", "maps_to_master_item": "Kahlua", "oz": 0.75, "tracked": "Yes"}, {"drink": "White Sangria", "maps_to_master_item": null, "oz": null, "tracked": "No"}, {"drink": "White Tea Shot (Gummy Bear)", "maps_to_master_item": "Zazzo's Vodka", "oz": 1, "tracked": "Yes"}, {"drink": "White Tea Shot (Gummy Bear)", "maps_to_master_item": "Peachtree", "oz": 0.5, "tracked": "Yes"}, {"drink": "Zazzo's Long Island", "maps_to_master_item": "Zazzo's Gin", "oz": 0.25, "tracked": "Yes"}, {"drink": "Zazzo's Long Island", "maps_to_master_item": "Zazzo's Tequila", "oz": 0.25, "tracked": "Yes"}, {"drink": "Zazzo's Long Island", "maps_to_master_item": "Zazzo's Rum", "oz": 0.25, "tracked": "Yes"}, {"drink": "Zazzo's Long Island", "maps_to_master_item": "Zazzo's Vodka", "oz": 0.25, "tracked": "Yes"}, {"drink": "Zazzo's Mama", "maps_to_master_item": "Zazzo's Rum", "oz": 0.75, "tracked": "Yes"}, {"drink": "Zazzo's Mama", "maps_to_master_item": "Rumhaven", "oz": 0.75, "tracked": "Yes"}, {"drink": "Zazzo's Old Fashioned", "maps_to_master_item": "Whistle Pig", "oz": 2, "tracked": "Yes"}, {"drink": "Zazzo's Paloma", "maps_to_master_item": "Zazzo's Tequila", "oz": 1.5, "tracked": "Yes"}, {"drink": "Zazzo's Rootbeer", "maps_to_master_item": "Captain Morgan", "oz": 1.5, "tracked": "Yes"}];
+const SPECIALTY_NAME_FIX = { "Expresso Martini": "Espresso Martini", "Sambucca": "Sambuca", "Kahlúa": "Kahlua" };
+const SPECIALTY_STRAIGHT_POUR = {
+    "Baileys": { ingredient: "Baileys", oz: 1.5 },
+    "Disaranno Amaretto 1L": { ingredient: "Disaranno Amaretto 1L", oz: 1.5 },
+    "Jack Fire": { ingredient: "Jack Fire", oz: 1.5 },
+    "Jack Honey": { ingredient: "Jack Honey", oz: 1.5 },
+    "Kahlua": { ingredient: "Kahlua", oz: 1.5 },
+    "Sambuca": { ingredient: "Sambuca", oz: 1.5 },
+};
+function processSpecialty(text) {
+    const rows = parseSalesByItemLines(text);
+    const recipeMap = {};
+    for (const r of RECIPE_DATABASE) {
+        if (r.tracked !== "Yes") continue;
+        if (!recipeMap[r.drink]) recipeMap[r.drink] = [];
+        recipeMap[r.drink].push({ ingredient: r.maps_to_master_item, oz: r.oz });
+    }
+    const ozByItem = {}, flags = [];
+    function addDepletion(ingredient, amount) { ozByItem[ingredient] = (ozByItem[ingredient] || 0) + amount; }
+    for (const row of rows) {
+        if (SPECIALTY_STRAIGHT_POUR[row.name]) {
+            const { ingredient, oz } = SPECIALTY_STRAIGHT_POUR[row.name];
+            addDepletion(ingredient, oz * row.qty);
+            continue;
+        }
+        const drinkName = SPECIALTY_NAME_FIX[row.name] || row.name;
+        const recipe = recipeMap[drinkName];
+        if (!recipe) { flags.push(`No recipe found for "${row.name}" (qty ${row.qty}) - add it to the Recipe Database or check spelling`); continue; }
+        for (const ing of recipe) addDepletion(ing.ingredient, ing.oz * row.qty);
+    }
+    const bottles = {};
+    for (const [item, oz] of Object.entries(ozByItem)) bottles[item] = Math.round((oz / LIQUOR_BOTTLE_OZ) * 100) / 100;
+    return { bottles, flags };
+}
+
 const WINE_SUPPRESS = new Set(["2876"]); // Red Sangria — specialty cocktail, not a straight wine pour
+// LaMarca Split is a single-serve mini-bottle (187ml), rung up at the register as a
+// "Glass" for convenience - but it is NOT a glass poured from a larger bottle, so running
+// it through the standard glass-to-bottle ratio (WINE_GLASSES_PER_BOTTLE, built for a
+// 750ml bottle poured into ~5oz glasses) is the wrong math entirely. Every sale is one
+// whole unit, full stop - no oz conversion needed. (Note: an earlier attempted fix here
+// tried to solve this by changing the bottle-oz constant instead - that was a no-op,
+// since multiplying and then dividing by the same constant always cancels out regardless
+// of its value. This is the actual fix.)
+const WINE_UNIT_SOLD = new Set(["LaMarca Split"]);
 function processWine(text) {
   const rows = parseSizesSoldWine(text);
-  const ozByItem = {}, flags = [];
+  const ozByItem = {}, unitByItem = {}, flags = [];
   for (const r of rows) {
     if (WINE_SUPPRESS.has(r.plu)) continue;
     const item = PLU_MAPS.wine[r.plu];
     if (!item) { flags.push(`Unmapped Wine PLU ${r.plu} ("${r.name}", qty ${r.qty})`); continue; }
+    if (WINE_UNIT_SOLD.has(item)) { unitByItem[item] = (unitByItem[item] || 0) + r.qty; continue; }
     const oz = r.size === "Bottle" ? r.qty * WINE_BOTTLE_OZ : (r.qty / WINE_GLASSES_PER_BOTTLE) * WINE_BOTTLE_OZ;
     ozByItem[item] = (ozByItem[item] || 0) + oz;
   }
   const bottles = {};
   for (const [item, oz] of Object.entries(ozByItem)) bottles[item] = Math.round((oz / WINE_BOTTLE_OZ) * 100) / 100;
+  for (const [item, qty] of Object.entries(unitByItem)) bottles[item] = qty;
   return { bottles, flags };
 }
 function processCarryout(text) {
@@ -791,7 +859,7 @@ function runParser(reportType, text) {
     case "vodkade": { const { items, flags } = processModifierCategory("vodkade", text); return { bottles: items, flags }; }
     case "nonalcoholic": { const { items, flags } = processSimpleItemCategory("nonalcoholic", text); return { bottles: items, flags }; }
     case "nonalcoholic_modifier": { const { items, flags } = processModifierCategory("nonalcoholic", text); return { bottles: items, flags }; }
-    case "specialty": return { bottles: {}, flags: ["Specialty drinks need the recipe engine — not wired up yet for Darien."] };
+    case "specialty": return processSpecialty(text);
     default: return { bottles: {}, flags: ["Couldn't detect a report category — paste the report exactly as exported from Speedline (including the 'Category:' header line), or pick a category manually."] };
   }
 }
@@ -840,7 +908,7 @@ function sumStockForProduct(stock, name) {
 
 /* ───────────────────────── NAV ───────────────────────── */
 /* ───────────────────────── HOME (tile menu) ───────────────────────── */
-const APP_VERSION = "v4.4";
+const APP_VERSION = "v5.0";
 
 function Home({ onNavigate, onClearAll }) {
   const tapCountRef = useRef(0);
@@ -1052,7 +1120,18 @@ function SpeedlineScreen({ session, setSession, onHome }) {
       if (file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf")) text = await extractPdfText(file);
       else text = await file.text();
       const type = detectReportType(text);
-      if (type) found[type] = { text, name: file.name };
+      // Previously this line was `found[type] = { text, name: file.name }`, which OVERWRITES
+      // any earlier file already detected as this same category - if your Beer report spans
+      // more than one file/page, only the last one survived and everything else was silently
+      // dropped. This is very likely why beer numbers looked complete in one test and badly
+      // undercounted in another - it depended on exactly which files got processed last.
+      if (type) {
+        if (found[type]) {
+          found[type] = { text: found[type].text + "\n" + text, name: found[type].name + " + " + file.name };
+        } else {
+          found[type] = { text, name: file.name };
+        }
+      }
       else unrecognized.push(file.name);
     }
     setDetectedFiles(found);

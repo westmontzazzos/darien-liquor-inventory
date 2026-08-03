@@ -482,8 +482,6 @@ const PLU_MAPS = {
     "3439": "Yuengling", "3440": "Yuengling",
     // Legacy entries from the original spreadsheet — untested against a real report, kept as-is:
     "3220": "Bud Sunday Bucket",
-    "2942": "Game Day Domestic",
-    "2944": "Game Day Import",
   },
   // Real "High Noon" modifier report — flavor breakdown PLUs confirmed from an actual export.
   highnoon: {
@@ -772,14 +770,33 @@ function processLiquor(text) {
 // the parser. Recipe data below is pulled live from Zazzo's real recipe_database table,
 // since these are the same drink recipes served at both locations.
 const RECIPE_DATABASE = [{"drink": "Aperol Spritz", "maps_to_master_item": "Lamarca Splitz", "oz": 1, "tracked": "Yes"}, {"drink": "Aperol Spritz", "maps_to_master_item": "Aperol", "oz": 1, "tracked": "Yes"}, {"drink": "Basil Grapefruit Smash", "maps_to_master_item": "Zazzo's Vodka", "oz": 2, "tracked": "Yes"}, {"drink": "Breakfast Shot", "maps_to_master_item": "Jameson", "oz": 0.75, "tracked": "Yes"}, {"drink": "Chocolate Martini", "maps_to_master_item": "Tippy Cow", "oz": 1, "tracked": "Yes"}, {"drink": "Chocolate Martini", "maps_to_master_item": "Sobieski Vanilla", "oz": 2, "tracked": "Yes"}, {"drink": "Chocolate Peppermint Martini", "maps_to_master_item": "Zazzo's Vodka", "oz": 1.5, "tracked": "Yes"}, {"drink": "Chocolate Peppermint Martini", "maps_to_master_item": "Tippy Cow", "oz": 1, "tracked": "Yes"}, {"drink": "Cinnamon Toast Crunch Shot", "maps_to_master_item": "Fireball Apple", "oz": 0.75, "tracked": "Yes"}, {"drink": "Cinnamon Toast Crunch Shot", "maps_to_master_item": "Rumchata", "oz": 0.25, "tracked": "Yes"}, {"drink": "Colada", "maps_to_master_item": "Zazzo's Rum", "oz": 1.5, "tracked": "Yes"}, {"drink": "Espresso Martini", "maps_to_master_item": "Kahlua", "oz": 0.5, "tracked": "Yes"}, {"drink": "Espresso Martini", "maps_to_master_item": "Sobieski Vanilla", "oz": 1.5, "tracked": "Yes"}, {"drink": "French 75", "maps_to_master_item": "Lamarca Splitz", "oz": 1, "tracked": "Yes"}, {"drink": "French 75", "maps_to_master_item": "Zazzo's Gin", "oz": 0.5, "tracked": "Yes"}, {"drink": "French Martini", "maps_to_master_item": "Zazzo's Vodka", "oz": 1.5, "tracked": "Yes"}, {"drink": "French Martini", "maps_to_master_item": "Chambord", "oz": 0.25, "tracked": "Yes"}, {"drink": "Green Tea Shot", "maps_to_master_item": "Jameson", "oz": 1, "tracked": "Yes"}, {"drink": "Green Tea Shot", "maps_to_master_item": "Peachtree", "oz": 0.5, "tracked": "Yes"}, {"drink": "Irish Mule", "maps_to_master_item": "Jameson", "oz": 1.5, "tracked": "Yes"}, {"drink": "Lemon Drop Martini", "maps_to_master_item": "Sobieski Citron", "oz": 2, "tracked": "Yes"}, {"drink": "Margarita", "maps_to_master_item": "Zazzo's Tequila", "oz": 2, "tracked": "Yes"}, {"drink": "Mimosa", "maps_to_master_item": "Lamarca Splitz", "oz": 3, "tracked": "Yes"}, {"drink": "O-Bomb", "maps_to_master_item": "Zazzo's Vodka", "oz": 1, "tracked": "Yes"}, {"drink": "Original Mule", "maps_to_master_item": "Zazzo's Vodka", "oz": 1.5, "tracked": "Yes"}, {"drink": "Paloma", "maps_to_master_item": "Zazzo's Tequila", "oz": 1.5, "tracked": "Yes"}, {"drink": "Perfect Manhattan", "maps_to_master_item": "Woodford Reserve", "oz": 2, "tracked": "Yes"}, {"drink": "Pineapple Upside Down", "maps_to_master_item": "Zazzo's Vodka", "oz": 2, "tracked": "Yes"}, {"drink": "Pretty in Pink", "maps_to_master_item": "Zazzo's Vodka", "oz": 0.75, "tracked": "Yes"}, {"drink": "Pretty in Pink", "maps_to_master_item": "Peachtree", "oz": 0.5, "tracked": "Yes"}, {"drink": "Pretty in Pink", "maps_to_master_item": "Zazzo's Rum", "oz": 1.25, "tracked": "Yes"}, {"drink": "Red Sangria", "maps_to_master_item": null, "oz": null, "tracked": "No"}, {"drink": "Revolver", "maps_to_master_item": "Bulleit Bourbon", "oz": 3, "tracked": "Yes"}, {"drink": "Revolver", "maps_to_master_item": "Kahlua", "oz": 1, "tracked": "Yes"}, {"drink": "Scooby Snack Shot", "maps_to_master_item": "Midori", "oz": 0.75, "tracked": "Yes"}, {"drink": "Scooby Snack Shot", "maps_to_master_item": "Zazzo's Rum", "oz": 0.75, "tracked": "Yes"}, {"drink": "Smokey Old Fashioned", "maps_to_master_item": "Zazzo's Bourbon", "oz": 2, "tracked": "Yes"}, {"drink": "Sparkling Cosmo", "maps_to_master_item": "Lamarca Splitz", "oz": 1, "tracked": "Yes"}, {"drink": "Sparkling Cosmo", "maps_to_master_item": "Tito's", "oz": 1.5, "tracked": "Yes"}, {"drink": "Taste of Italy", "maps_to_master_item": "Peachtree", "oz": 0.5, "tracked": "Yes"}, {"drink": "Taste of Italy", "maps_to_master_item": "Lamarca Splitz", "oz": 1, "tracked": "Yes"}, {"drink": "Taste of Italy", "maps_to_master_item": "Zazzo's Vodka", "oz": 0.5, "tracked": "Yes"}, {"drink": "The Calvary Old Fashioned", "maps_to_master_item": "Horse Soldier", "oz": 2, "tracked": "Yes"}, {"drink": "The Venetian Spritz", "maps_to_master_item": "Lamarca Splitz", "oz": 1, "tracked": "Yes"}, {"drink": "The Venetian Spritz", "maps_to_master_item": "Select Aperitif", "oz": 1, "tracked": "Yes"}, {"drink": "Thin Mint Shot", "maps_to_master_item": "Tippy Cow", "oz": 1, "tracked": "Yes"}, {"drink": "Thin Mint Shot", "maps_to_master_item": "Rumple Minze", "oz": 0.5, "tracked": "Yes"}, {"drink": "Tiramisu Martini", "maps_to_master_item": "Kahlua", "oz": 0.25, "tracked": "Yes"}, {"drink": "Tiramisu Martini", "maps_to_master_item": "Zazzo's Vodka", "oz": 2, "tracked": "Yes"}, {"drink": "Vegas Bomb", "maps_to_master_item": "Crown Royal", "oz": 1, "tracked": "Yes"}, {"drink": "White Russian", "maps_to_master_item": "Zazzo's Vodka", "oz": 1.25, "tracked": "Yes"}, {"drink": "White Russian", "maps_to_master_item": "Kahlua", "oz": 0.75, "tracked": "Yes"}, {"drink": "White Sangria", "maps_to_master_item": null, "oz": null, "tracked": "No"}, {"drink": "White Tea Shot (Gummy Bear)", "maps_to_master_item": "Zazzo's Vodka", "oz": 1, "tracked": "Yes"}, {"drink": "White Tea Shot (Gummy Bear)", "maps_to_master_item": "Peachtree", "oz": 0.5, "tracked": "Yes"}, {"drink": "Zazzo's Long Island", "maps_to_master_item": "Zazzo's Gin", "oz": 0.25, "tracked": "Yes"}, {"drink": "Zazzo's Long Island", "maps_to_master_item": "Zazzo's Tequila", "oz": 0.25, "tracked": "Yes"}, {"drink": "Zazzo's Long Island", "maps_to_master_item": "Zazzo's Rum", "oz": 0.25, "tracked": "Yes"}, {"drink": "Zazzo's Long Island", "maps_to_master_item": "Zazzo's Vodka", "oz": 0.25, "tracked": "Yes"}, {"drink": "Zazzo's Mama", "maps_to_master_item": "Zazzo's Rum", "oz": 0.75, "tracked": "Yes"}, {"drink": "Zazzo's Mama", "maps_to_master_item": "Rumhaven", "oz": 0.75, "tracked": "Yes"}, {"drink": "Zazzo's Old Fashioned", "maps_to_master_item": "Whistle Pig", "oz": 2, "tracked": "Yes"}, {"drink": "Zazzo's Paloma", "maps_to_master_item": "Zazzo's Tequila", "oz": 1.5, "tracked": "Yes"}, {"drink": "Zazzo's Rootbeer", "maps_to_master_item": "Captain Morgan", "oz": 1.5, "tracked": "Yes"}];
-const SPECIALTY_NAME_FIX = { "Expresso Martini": "Espresso Martini", "Sambucca": "Sambuca", "Kahlúa": "Kahlua" };
+const SPECIALTY_NAME_FIX = {
+    "Expresso Martini": "Espresso Martini",
+    "Sambucca": "Sambuca",
+    "Kahlúa": "Kahlua",
+    "Zazzo's Old Fashion": "Zazzo's Old Fashioned",
+    "Smokey Zazzo's Old Fashion": "Smokey Old Fashioned",
+    "Perfect Manahattan": "Perfect Manhattan",
+    "Cinnamon Toast": "Cinnamon Toast Crunch Shot",
+    "White Tea Shot": "White Tea Shot (Gummy Bear)",
+    "Scooby Snack": "Scooby Snack Shot",
+    "Crown Vegas Bomb": "Vegas Bomb",
+    "Original Margarita": "Margarita",
+};
 const SPECIALTY_STRAIGHT_POUR = {
     "Baileys": { ingredient: "Baileys", oz: 1.5 },
     "Disaranno Amaretto 1L": { ingredient: "Disaranno Amaretto 1L", oz: 1.5 },
+    "Disaronno": { ingredient: "Disaranno Amaretto 1L", oz: 1.5 },
     "Jack Fire": { ingredient: "Jack Fire", oz: 1.5 },
     "Jack Honey": { ingredient: "Jack Honey", oz: 1.5 },
     "Kahlua": { ingredient: "Kahlua", oz: 1.5 },
     "Sambuca": { ingredient: "Sambuca", oz: 1.5 },
+    "Chambord": { ingredient: "Chambord 750ml", oz: 1.5 },
+    "E&J Brandy": { ingredient: "E&J", oz: 1.5 },
+    "Grand Marnier": { ingredient: "Grand Marnier 1L", oz: 1.5 },
+    "Jagermeister": { ingredient: "Jager", oz: 1.5 },
+    "Rumchata": { ingredient: "Rumchata", oz: 1.5 },
+    "Rumpleminze": { ingredient: "Rumplemintz", oz: 1.5 },
 };
 function processSpecialty(text) {
     const rows = parseSalesByItemLines(text);
@@ -908,7 +925,7 @@ function sumStockForProduct(stock, name) {
 
 /* ───────────────────────── NAV ───────────────────────── */
 /* ───────────────────────── HOME (tile menu) ───────────────────────── */
-const APP_VERSION = "v5.1";
+const APP_VERSION = "v5.2";
 
 function Home({ onNavigate, onClearAll }) {
   const tapCountRef = useRef(0);

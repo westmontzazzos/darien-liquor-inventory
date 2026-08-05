@@ -771,7 +771,7 @@ function processLiquor(text) {
 // category: any liquor used in a Martini, Mule, Old Fashioned, etc. was invisible to
 // the parser. Recipe data below is pulled live from Zazzo's real recipe_database table,
 // since these are the same drink recipes served at both locations.
-const RECIPE_DATABASE = [{"drink": "Aperol Spritz", "maps_to_master_item": "LaMarca Split", "oz": 1, "tracked": "Yes"}, {"drink": "Aperol Spritz", "maps_to_master_item": "Aperol 1L", "oz": 1, "tracked": "Yes"}, {"drink": "Basil Grapefruit Smash", "maps_to_master_item": "Zazzo's Vodka", "oz": 2, "tracked": "Yes"}, {"drink": "Breakfast Shot", "maps_to_master_item": "Jameson", "oz": 0.75, "tracked": "Yes"}, {"drink": "Chocolate Martini", "maps_to_master_item": "Tippy Cow", "oz": 1, "tracked": "Yes"}, {"drink": "Chocolate Martini", "maps_to_master_item": "Sobieski Vanilla", "oz": 2, "tracked": "Yes"}, {"drink": "Chocolate Peppermint Martini", "maps_to_master_item": "Zazzo's Vodka", "oz": 1.5, "tracked": "Yes"}, {"drink": "Chocolate Peppermint Martini", "maps_to_master_item": "Tippy Cow", "oz": 1, "tracked": "Yes"}, {"drink": "Cinnamon Toast Crunch Shot", "maps_to_master_item": "Fireball Apple", "oz": 0.75, "tracked": "Yes"}, {"drink": "Cinnamon Toast Crunch Shot", "maps_to_master_item": "Rumchata", "oz": 0.25, "tracked": "Yes"}, {"drink": "Colada", "maps_to_master_item": "Zazzo's Rum", "oz": 1.5, "tracked": "Yes"}, {"drink": "Espresso Martini", "maps_to_master_item": "Kahlua", "oz": 0.5, "tracked": "Yes"}, {"drink": "Espresso Martini", "maps_to_master_item": "Sobieski Vanilla", "oz": 1.5, "tracked": "Yes"}, {"drink": "French 75", "maps_to_master_item": "Lamarca Splitz", "oz": 1, "tracked": "Yes"}, {"drink": "French 75", "maps_to_master_item": "Zazzo's Gin", "oz": 0.5, "tracked": "Yes"}, {"drink": "French Martini", "maps_to_master_item": "Zazzo's Vodka", "oz": 1.5, "tracked": "Yes"}, {"drink": "French Martini", "maps_to_master_item": "Chambord", "oz": 0.25, "tracked": "Yes"}, {"drink": "Green Tea Shot", "maps_to_master_item": "Jameson", "oz": 1, "tracked": "Yes"}, {"drink": "Green Tea Shot", "maps_to_master_item": "Peachtree", "oz": 0.5, "tracked": "Yes"}, {"drink": "Irish Mule", "maps_to_master_item": "Jameson", "oz": 1.5, "tracked": "Yes"}, {"drink": "Lemon Drop Martini", "maps_to_master_item": "Sobieski Citron", "oz": 2, "tracked": "Yes"}, {"drink": "Margarita", "maps_to_master_item": "Zazzo's Tequila", "oz": 2, "tracked": "Yes"}, {"drink": "Mimosa", "maps_to_master_item": "Lamarca Splitz", "oz": 3, "tracked": "Yes"}, {"drink": "O-Bomb", "maps_to_master_item": "Zazzo's Vodka", "oz": 1, "tracked": "Yes"}, {"drink": "Original Mule", "maps_to_master_item": "Zazzo's Vodka", "oz": 1.5, "tracked": "Yes"}, {"drink": "Paloma", "maps_to_master_item": "Zazzo's Tequila", "oz": 1.5, "tracked": "Yes"}, {"drink": "Perfect Manhattan", "maps_to_master_item": "Woodford Reserve", "oz": 2, "tracked": "Yes"}, {"drink": "Pineapple Upside Down", "maps_to_master_item": "Zazzo's Vodka", "oz": 2, "tracked": "Yes"}, {"drink": "Pretty in Pink", "maps_to_master_item": "Zazzo's Vodka", "oz": 0.75, "tracked": "Yes"}, {"drink": "Pretty in Pink", "maps_to_master_item": "Peachtree", "oz": 0.5, "tracked": "Yes"}, {"drink": "Pretty in Pink", "maps_to_master_item": "Zazzo's Rum", "oz": 1.25, "tracked": "Yes"}, {"drink": "Red Sangria", "maps_to_master_item": null, "oz": null, "tracked": "No"}, {"drink": "Revolver", "maps_to_master_item": "Bulleit Bourbon", "oz": 3, "tracked": "Yes"}, {"drink": "Revolver", "maps_to_master_item": "Kahlua", "oz": 1, "tracked": "Yes"}, {"drink": "Scooby Snack Shot", "maps_to_master_item": "Midori", "oz": 0.75, "tracked": "Yes"}, {"drink": "Scooby Snack Shot", "maps_to_master_item": "Zazzo's Rum", "oz": 0.75, "tracked": "Yes"}, {"drink": "Smokey Old Fashioned", "maps_to_master_item": "Zazzo's Bourbon", "oz": 2, "tracked": "Yes"}, {"drink": "Sparkling Cosmo", "maps_to_master_item": "Lamarca Splitz", "oz": 1, "tracked": "Yes"}, {"drink": "Sparkling Cosmo", "maps_to_master_item": "Tito's", "oz": 1.5, "tracked": "Yes"}, {"drink": "Taste of Italy", "maps_to_master_item": "Peachtree", "oz": 0.5, "tracked": "Yes"}, {"drink": "Taste of Italy", "maps_to_master_item": "Lamarca Splitz", "oz": 1, "tracked": "Yes"}, {"drink": "Taste of Italy", "maps_to_master_item": "Zazzo's Vodka", "oz": 0.5, "tracked": "Yes"}, {"drink": "The Calvary Old Fashioned", "maps_to_master_item": "Horse Soldier", "oz": 2, "tracked": "Yes"}, {"drink": "Thin Mint Shot", "maps_to_master_item": "Tippy Cow", "oz": 1, "tracked": "Yes"}, {"drink": "Thin Mint Shot", "maps_to_master_item": "Rumple Minze", "oz": 0.5, "tracked": "Yes"}, {"drink": "Tiramisu Martini", "maps_to_master_item": "Kahlua", "oz": 0.25, "tracked": "Yes"}, {"drink": "Tiramisu Martini", "maps_to_master_item": "Zazzo's Vodka", "oz": 2, "tracked": "Yes"}, {"drink": "Vegas Bomb", "maps_to_master_item": "Crown Royal", "oz": 1, "tracked": "Yes"}, {"drink": "White Russian", "maps_to_master_item": "Zazzo's Vodka", "oz": 1.25, "tracked": "Yes"}, {"drink": "White Russian", "maps_to_master_item": "Kahlua", "oz": 0.75, "tracked": "Yes"}, {"drink": "White Sangria", "maps_to_master_item": null, "oz": null, "tracked": "No"}, {"drink": "White Tea Shot (Gummy Bear)", "maps_to_master_item": "Zazzo's Vodka", "oz": 1, "tracked": "Yes"}, {"drink": "White Tea Shot (Gummy Bear)", "maps_to_master_item": "Peachtree", "oz": 0.5, "tracked": "Yes"}, {"drink": "Zazzo's Long Island", "maps_to_master_item": "Zazzo's Gin", "oz": 0.25, "tracked": "Yes"}, {"drink": "Zazzo's Long Island", "maps_to_master_item": "Zazzo's Tequila", "oz": 0.25, "tracked": "Yes"}, {"drink": "Zazzo's Long Island", "maps_to_master_item": "Zazzo's Rum", "oz": 0.25, "tracked": "Yes"}, {"drink": "Zazzo's Long Island", "maps_to_master_item": "Zazzo's Vodka", "oz": 0.25, "tracked": "Yes"}, {"drink": "Zazzo's Mama", "maps_to_master_item": "Zazzo's Rum", "oz": 0.75, "tracked": "Yes"}, {"drink": "Zazzo's Mama", "maps_to_master_item": "Rumhaven", "oz": 0.75, "tracked": "Yes"}, {"drink": "Zazzo's Old Fashioned", "maps_to_master_item": "Whistle Pig", "oz": 2, "tracked": "Yes"}, {"drink": "Zazzo's Paloma", "maps_to_master_item": "Zazzo's Tequila", "oz": 1.5, "tracked": "Yes"}, {"drink": "Zazzo's Rootbeer", "maps_to_master_item": "Captain Morgan", "oz": 1.5, "tracked": "Yes"}];
+const RECIPE_DATABASE = [{"drink": "Aperol Spritz", "maps_to_master_item": "LaMarca Split", "oz": 1, "tracked": "Yes"}, {"drink": "Aperol Spritz", "maps_to_master_item": "Aperol 1L", "oz": 1, "tracked": "Yes"}, {"drink": "Basil Grapefruit Smash", "maps_to_master_item": "Zazzo's Vodka", "oz": 2, "tracked": "Yes"}, {"drink": "Breakfast Shot", "maps_to_master_item": "Jameson", "oz": 0.75, "tracked": "Yes"}, {"drink": "Chocolate Martini", "maps_to_master_item": "Tippy Cow", "oz": 1, "tracked": "Yes"}, {"drink": "Chocolate Martini", "maps_to_master_item": "Sobieski Vanilla", "oz": 2, "tracked": "Yes"}, {"drink": "Chocolate Peppermint Martini", "maps_to_master_item": "Zazzo's Vodka", "oz": 1.5, "tracked": "Yes"}, {"drink": "Chocolate Peppermint Martini", "maps_to_master_item": "Tippy Cow", "oz": 1, "tracked": "Yes"}, {"drink": "Cinnamon Toast Crunch Shot", "maps_to_master_item": "Fireball Apple", "oz": 0.75, "tracked": "Yes"}, {"drink": "Cinnamon Toast Crunch Shot", "maps_to_master_item": "Rumchata", "oz": 0.25, "tracked": "Yes"}, {"drink": "Colada", "maps_to_master_item": "Zazzo's Rum", "oz": 1.5, "tracked": "Yes"}, {"drink": "Espresso Martini", "maps_to_master_item": "Kahlua", "oz": 0.5, "tracked": "Yes"}, {"drink": "Espresso Martini", "maps_to_master_item": "Sobieski Vanilla", "oz": 1.5, "tracked": "Yes"}, {"drink": "French 75", "maps_to_master_item": "Lamarca Splitz", "oz": 1, "tracked": "Yes"}, {"drink": "French 75", "maps_to_master_item": "Zazzo's Gin", "oz": 0.5, "tracked": "Yes"}, {"drink": "French Martini", "maps_to_master_item": "Zazzo's Vodka", "oz": 1.5, "tracked": "Yes"}, {"drink": "French Martini", "maps_to_master_item": "Chambord", "oz": 0.25, "tracked": "Yes"}, {"drink": "Green Tea Shot", "maps_to_master_item": "Jameson", "oz": 1, "tracked": "Yes"}, {"drink": "Green Tea Shot", "maps_to_master_item": "Peachtree", "oz": 0.5, "tracked": "Yes"}, {"drink": "Irish Mule", "maps_to_master_item": "Jameson", "oz": 1.5, "tracked": "Yes"}, {"drink": "Jaegar Bomb", "maps_to_master_item": "Jager", "oz": 1, "tracked": "Yes"}, {"drink": "Lemon Drop Martini", "maps_to_master_item": "Sobieski Citron", "oz": 2, "tracked": "Yes"}, {"drink": "Margarita", "maps_to_master_item": "Zazzo's Tequila", "oz": 2, "tracked": "Yes"}, {"drink": "Mimosa", "maps_to_master_item": "Lamarca Splitz", "oz": 3, "tracked": "Yes"}, {"drink": "O-Bomb", "maps_to_master_item": "Zazzo's Vodka", "oz": 1, "tracked": "Yes"}, {"drink": "Original Mule", "maps_to_master_item": "Zazzo's Vodka", "oz": 1.5, "tracked": "Yes"}, {"drink": "Paloma", "maps_to_master_item": "Zazzo's Tequila", "oz": 1.5, "tracked": "Yes"}, {"drink": "Perfect Manhattan", "maps_to_master_item": "Woodford Reserve", "oz": 2, "tracked": "Yes"}, {"drink": "Pineapple Upside Down", "maps_to_master_item": "Zazzo's Vodka", "oz": 2, "tracked": "Yes"}, {"drink": "Pretty in Pink", "maps_to_master_item": "Zazzo's Vodka", "oz": 0.75, "tracked": "Yes"}, {"drink": "Pretty in Pink", "maps_to_master_item": "Peachtree", "oz": 0.5, "tracked": "Yes"}, {"drink": "Pretty in Pink", "maps_to_master_item": "Zazzo's Rum", "oz": 1.25, "tracked": "Yes"}, {"drink": "Red Sangria", "maps_to_master_item": null, "oz": null, "tracked": "No"}, {"drink": "Revolver", "maps_to_master_item": "Bulleit Bourbon", "oz": 3, "tracked": "Yes"}, {"drink": "Revolver", "maps_to_master_item": "Kahlua", "oz": 1, "tracked": "Yes"}, {"drink": "Scooby Snack Shot", "maps_to_master_item": "Midori", "oz": 0.75, "tracked": "Yes"}, {"drink": "Scooby Snack Shot", "maps_to_master_item": "Zazzo's Rum", "oz": 0.75, "tracked": "Yes"}, {"drink": "Smokey Old Fashioned", "maps_to_master_item": "Zazzo's Bourbon", "oz": 2, "tracked": "Yes"}, {"drink": "Sparkling Cosmo", "maps_to_master_item": "Lamarca Splitz", "oz": 1, "tracked": "Yes"}, {"drink": "Sparkling Cosmo", "maps_to_master_item": "Tito's", "oz": 1.5, "tracked": "Yes"}, {"drink": "Taste of Italy", "maps_to_master_item": "Peachtree", "oz": 0.5, "tracked": "Yes"}, {"drink": "Taste of Italy", "maps_to_master_item": "Lamarca Splitz", "oz": 1, "tracked": "Yes"}, {"drink": "Taste of Italy", "maps_to_master_item": "Zazzo's Vodka", "oz": 0.5, "tracked": "Yes"}, {"drink": "The Calvary Old Fashioned", "maps_to_master_item": "Horse Soldier", "oz": 2, "tracked": "Yes"}, {"drink": "Thin Mint Shot", "maps_to_master_item": "Tippy Cow", "oz": 1, "tracked": "Yes"}, {"drink": "Thin Mint Shot", "maps_to_master_item": "Rumple Minze", "oz": 0.5, "tracked": "Yes"}, {"drink": "Tiramisu Martini", "maps_to_master_item": "Kahlua", "oz": 0.25, "tracked": "Yes"}, {"drink": "Tiramisu Martini", "maps_to_master_item": "Zazzo's Vodka", "oz": 2, "tracked": "Yes"}, {"drink": "Vegas Bomb", "maps_to_master_item": "Crown Royal", "oz": 1, "tracked": "Yes"}, {"drink": "White Russian", "maps_to_master_item": "Zazzo's Vodka", "oz": 1.25, "tracked": "Yes"}, {"drink": "White Russian", "maps_to_master_item": "Kahlua", "oz": 0.75, "tracked": "Yes"}, {"drink": "White Sangria", "maps_to_master_item": null, "oz": null, "tracked": "No"}, {"drink": "White Tea Shot (Gummy Bear)", "maps_to_master_item": "Zazzo's Vodka", "oz": 1, "tracked": "Yes"}, {"drink": "White Tea Shot (Gummy Bear)", "maps_to_master_item": "Peachtree", "oz": 0.5, "tracked": "Yes"}, {"drink": "Zazzo's Long Island", "maps_to_master_item": "Zazzo's Gin", "oz": 0.25, "tracked": "Yes"}, {"drink": "Zazzo's Long Island", "maps_to_master_item": "Zazzo's Tequila", "oz": 0.25, "tracked": "Yes"}, {"drink": "Zazzo's Long Island", "maps_to_master_item": "Zazzo's Rum", "oz": 0.25, "tracked": "Yes"}, {"drink": "Zazzo's Long Island", "maps_to_master_item": "Zazzo's Vodka", "oz": 0.25, "tracked": "Yes"}, {"drink": "Zazzo's Mama", "maps_to_master_item": "Zazzo's Rum", "oz": 0.75, "tracked": "Yes"}, {"drink": "Zazzo's Mama", "maps_to_master_item": "Rumhaven", "oz": 0.75, "tracked": "Yes"}, {"drink": "Zazzo's Old Fashioned", "maps_to_master_item": "Whistle Pig", "oz": 2, "tracked": "Yes"}, {"drink": "Zazzo's Paloma", "maps_to_master_item": "Zazzo's Tequila", "oz": 1.5, "tracked": "Yes"}, {"drink": "Zazzo's Rootbeer", "maps_to_master_item": "Captain Morgan", "oz": 1.5, "tracked": "Yes"}];
 const SPECIALTY_NAME_FIX = {
     "Expresso Martini": "Espresso Martini",
     "Sambucca": "Sambuca",
@@ -959,7 +959,7 @@ function sumStockForProduct(stock, name) {
 
 /* ───────────────────────── NAV ───────────────────────── */
 /* ───────────────────────── HOME (tile menu) ───────────────────────── */
-const APP_VERSION = "v7.0";
+const APP_VERSION = "v8.1";
 
 function Home({ onNavigate, onClearAll }) {
   const tapCountRef = useRef(0);
@@ -1664,8 +1664,9 @@ function ManualVsSpeedlineScreen({ master, manualCounts, setManualCounts, sessio
 }
 
 /* ───────────────────────── DEPLETION REPORT SCREEN ───────────────────────── */
-function DepletionScreen({ master, stock, setStock, received, setReceived, lastWeek, setLastWeek, session, onCloseWeek, onHome }) {
+function DepletionScreen({ master, stock, setStock, received, setReceived, lastWeek, setLastWeek, session, countNumber, onCloseCount, onHome, onNavigate }) {
   const [importMsg, setImportMsg] = useState("");
+  const [expandedRow, setExpandedRow] = useState(null);
   const importRef = useRef(null);
   const salesTotals = combineSalesSession(session);
   const masterNames = new Set(master.map(p => p.name));
@@ -1737,9 +1738,41 @@ function DepletionScreen({ master, stock, setStock, received, setReceived, lastW
 
   const unrecognized = Object.entries(salesTotals).filter(([name]) => !masterNames.has(name));
 
+  function exportShowMathPDF() {
+    downloadPDF({
+      filename: `Darien-Count-${countNumber}-Show-Math.pdf`,
+      title: "DARIEN LIQUOR INVENTORY",
+      sections: [{
+        heading: `Count ${countNumber} (Live) — Show Math`,
+        columns: [
+          { key: "name", header: "Product", width: 150 },
+          { key: "lastWk", header: "Last Wk", width: 55, align: "right" },
+          { key: "rec", header: "Received", width: 55, align: "right" },
+          { key: "current", header: "Current", width: 55, align: "right" },
+          { key: "depletion", header: "= Deplet.", width: 55, align: "right" },
+          { key: "sales", header: "Sales", width: 55, align: "right" },
+          { key: "variance", header: "= Variance", width: 60, align: "right" },
+        ],
+        rows: rows.map(r => ({
+          name: r.name,
+          lastWk: fmt2(r.lastWk), rec: fmt2(r.rec), current: fmt2(r.current),
+          depletion: fmt2(Math.round(r.depletion * 100) / 100),
+          sales: fmt2(r.sales),
+          variance: fmt2(Math.round(r.variance * 100) / 100),
+        })),
+      }],
+    });
+  }
+
   return h(React.Fragment, null,
     h(ScreenHeader, { onHome }),
     h("main", { className: "Page" },
+    h("div", { className: "Card", style: { background: "#EFF8F1", border: "1px solid #1B6B3A" } },
+      h("div", { style: { fontSize: 12, fontWeight: 700, color: "#1B6B3A" } }, "🟢 LIVE — Count " + countNumber + " (in progress, not yet closed)"),
+      h("div", { className: "btnrow", style: { marginTop: 8 } },
+        h("button", { className: "B B-ghost", onClick: () => onNavigate("counthistory") }, "📚 View Count History")
+      )
+    ),
     h("div", { className: "Card" },
       h("div", { className: "Card-title" }, "Import from Order Guide"),
       h("div", { className: "empty" }, "Upload Stephanie's spreadsheet — pulls Total, Last Week, and Received straight from the Order Guide tab. Sold always comes from the Speedline parser only, never from this file. Replaces all current Total/Last Week/Received values with what's in the file."),
@@ -1752,7 +1785,10 @@ function DepletionScreen({ master, stock, setStock, received, setReceived, lastW
     h("div", { className: "Card" },
       h("div", { className: "Card-title" }, "Depletion Report"),
       h("div", { className: "empty" },
-        "Depletion = Last Week + Received − Current Count. Variance = Sales − Depletion. Negative = short, positive = surplus, zero = even."
+        "Depletion = Last Week + Received − Current Count. Variance = Sales − Depletion. Negative = short, positive = surplus, zero = even. Tap any row to see the full math."
+      ),
+      h("div", { className: "btnrow", style: { marginTop: 8 } },
+        h("button", { className: "B B-ghost", onClick: exportShowMathPDF }, "⬇️ Show Math (PDF)")
       )
     ),
     h("div", { className: "Card" },
@@ -1767,17 +1803,26 @@ function DepletionScreen({ master, stock, setStock, received, setReceived, lastW
           h("th", { style: { textAlign: "right" } }, "Variance")
         )),
         h("tbody", null,
-          rows.map(r => h("tr", { key: r.name },
-            h("td", null, r.name),
-            h("td", null, r.category),
-            h("td", { className: "qty" }, r.lastWk ? fmt2(r.lastWk) : ""),
-            h("td", { className: "qty" }, r.rec ? fmt2(r.rec) : ""),
-            h("td", { className: "qty" }, r.current ? fmt2(r.current) : ""),
-            h("td", { className: "qty" }, Math.round(r.depletion * 100) / 100),
-            h("td", { className: "qty" }, Math.round(r.sales * 100) / 100),
-            h("td", { className: "qty", style: { color: r.variance < -0.01 ? "#C8102E" : r.variance > 0.01 ? "#B36A00" : "#1B6B3A", fontWeight: 600 } },
-              Math.round(r.variance * 100) / 100)
-          ))
+          rows.map(r => [
+            h("tr", { key: r.name, onClick: () => setExpandedRow(expandedRow === r.name ? null : r.name), style: { cursor: "pointer" } },
+              h("td", null, r.name),
+              h("td", null, r.category),
+              h("td", { className: "qty" }, r.lastWk ? fmt2(r.lastWk) : ""),
+              h("td", { className: "qty" }, r.rec ? fmt2(r.rec) : ""),
+              h("td", { className: "qty" }, r.current ? fmt2(r.current) : ""),
+              h("td", { className: "qty" }, Math.round(r.depletion * 100) / 100),
+              h("td", { className: "qty" }, Math.round(r.sales * 100) / 100),
+              h("td", { className: "qty", style: { color: r.variance < -0.01 ? "#C8102E" : r.variance > 0.01 ? "#B36A00" : "#1B6B3A", fontWeight: 600 } },
+                Math.round(r.variance * 100) / 100)
+            ),
+            expandedRow === r.name && h("tr", { key: r.name + "-math" },
+              h("td", { colSpan: 8, style: { background: "#FAFAFA", padding: "10px 14px", fontSize: 12.5, fontFamily: "'Courier New',monospace", color: "#333" } },
+                `Depletion:  ${fmt2(r.lastWk)} (Last Wk)  +  ${fmt2(r.rec)} (Received)  −  ${fmt2(r.current)} (Current)  =  ${Math.round(r.depletion * 100) / 100}`,
+                h("br"),
+                `Variance:   ${fmt2(r.sales)} (Sales)  −  ${Math.round(r.depletion * 100) / 100} (Depletion)  =  ${Math.round(r.variance * 100) / 100}`
+              )
+            )
+          ])
         )
       )
     ),
@@ -1789,11 +1834,94 @@ function DepletionScreen({ master, stock, setStock, received, setReceived, lastW
       )
     ),
     h("div", { className: "Card" },
-      h("div", { className: "Card-title" }, "Close Week"),
-      h("div", { className: "empty" }, "Archives current stock as next week's \"Last Week,\" then clears Received and the Speedline session for the new week. This does not persist anywhere yet — refreshing the page loses everything."),
-      h("div", { className: "btnrow" }, h("button", { className: "B B-green", onClick: onCloseWeek }, "Close Week & Start New"))
+      h("div", { className: "Card-title" }, "Close Count " + countNumber),
+      h("div", { className: "empty" }, "Archives this count permanently to Count History with its date range, then starts Count " + (countNumber + 1) + " fresh. This does persist now — refreshing the page will not lose it."),
+      h("div", { className: "btnrow" }, h("button", { className: "B B-green", onClick: onCloseCount }, "Close Count " + countNumber + " & Start Count " + (countNumber + 1)))
     )
   ));
+}
+
+/* ───────────────────────── COUNT HISTORY ───────────────────────── */
+function CountHistoryScreen({ counts, onHome }) {
+  const [openCount, setOpenCount] = useState(null); // countNumber currently expanded
+  const sortedCounts = [...counts].sort((a, b) => b.countNumber - a.countNumber);
+
+  function exportCountPDF(c) {
+    downloadPDF({
+      filename: `Darien-Count-${c.countNumber}-Show-Math.pdf`,
+      title: "DARIEN LIQUOR INVENTORY",
+      sections: [{
+        heading: `Count ${c.countNumber} (Archived) — ${c.dateStart} to ${c.dateEnd} — Show Math`,
+        columns: [
+          { key: "name", header: "Product", width: 150 },
+          { key: "lastWk", header: "Last Wk", width: 55, align: "right" },
+          { key: "rec", header: "Received", width: 55, align: "right" },
+          { key: "current", header: "Current", width: 55, align: "right" },
+          { key: "depletion", header: "= Deplet.", width: 55, align: "right" },
+          { key: "sales", header: "Sales", width: 55, align: "right" },
+          { key: "variance", header: "= Variance", width: 60, align: "right" },
+        ],
+        rows: c.rows.map(r => ({
+          name: r.name,
+          lastWk: fmt2(r.lastWk), rec: fmt2(r.rec), current: fmt2(r.current),
+          depletion: fmt2(Math.round(r.depletion * 100) / 100),
+          sales: fmt2(r.sales),
+          variance: fmt2(Math.round(r.variance * 100) / 100),
+        })),
+      }],
+    });
+  }
+
+  return h(React.Fragment, null,
+    h(ScreenHeader, { onHome }),
+    h("main", { className: "Page" },
+      h("div", { className: "Card" },
+        h("div", { className: "Card-title" }, "Count History"),
+        h("div", { className: "empty" }, counts.length === 0
+          ? "No counts closed out yet. Once you close a count from the Depletion screen, it'll show up here permanently — tap any count below to see its date range and full breakdown."
+          : "Tap a count to see its date range and full breakdown.")
+      ),
+      sortedCounts.map(c => h("div", { key: c.countNumber, className: "Card" },
+        h("div", {
+          className: "Card-title", style: { cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center" },
+          onClick: () => setOpenCount(openCount === c.countNumber ? null : c.countNumber)
+        },
+          h("span", null, "Count " + c.countNumber),
+          h("span", { style: { fontSize: 12, fontWeight: 400, color: "#666" } }, openCount === c.countNumber ? (c.dateStart + " – " + c.dateEnd) : "tap to expand")
+        ),
+        openCount === c.countNumber && h(React.Fragment, null,
+          h("div", { className: "empty" }, "Closed: " + c.closedAt),
+          h("div", { className: "btnrow" },
+            h("button", { className: "B B-ghost", onClick: () => exportCountPDF(c) }, "⬇️ Show Math (PDF)")
+          ),
+          h("table", { style: { marginTop: 10 } },
+            h("thead", null, h("tr", null,
+              h("th", null, "Product"), h("th", null, "Cat"),
+              h("th", { style: { textAlign: "right" } }, "Last Wk"),
+              h("th", { style: { textAlign: "right" } }, "Received"),
+              h("th", { style: { textAlign: "right" } }, "Current"),
+              h("th", { style: { textAlign: "right" } }, "Depletion"),
+              h("th", { style: { textAlign: "right" } }, "Sales"),
+              h("th", { style: { textAlign: "right" } }, "Variance")
+            )),
+            h("tbody", null,
+              c.rows.map(r => h("tr", { key: r.name },
+                h("td", null, r.name),
+                h("td", null, r.category),
+                h("td", { className: "qty" }, r.lastWk ? fmt2(r.lastWk) : ""),
+                h("td", { className: "qty" }, r.rec ? fmt2(r.rec) : ""),
+                h("td", { className: "qty" }, r.current ? fmt2(r.current) : ""),
+                h("td", { className: "qty" }, Math.round(r.depletion * 100) / 100),
+                h("td", { className: "qty" }, Math.round(r.sales * 100) / 100),
+                h("td", { className: "qty", style: { color: r.variance < -0.01 ? "#C8102E" : r.variance > 0.01 ? "#B36A00" : "#1B6B3A", fontWeight: 600 } },
+                  Math.round(r.variance * 100) / 100)
+              ))
+            )
+          )
+        )
+      ))
+    )
+  );
 }
 
 /* ───────────────────────── APP SHELL ───────────────────────── */
@@ -1806,7 +1934,8 @@ function App() {
   const [lastWeek, setLastWeek] = useState({});
   const [session, setSession] = useState([]);
   const [manualCounts, setManualCounts] = useState({});
-  const [weekCount, setWeekCount] = useState(1);
+  const [countNumber, setCountNumber] = useState(1);
+  const [counts, setCounts] = useState([]); // archived counts — real persistent history
   const [loaded, setLoaded] = useState(false);
 
   // Load saved state once on mount (device-local only — see note in chat).
@@ -1820,7 +1949,8 @@ function App() {
         if (saved.lastWeek) setLastWeek(saved.lastWeek);
         if (saved.session) setSession(saved.session);
         if (saved.manualCounts) setManualCounts(saved.manualCounts);
-        if (saved.weekCount) setWeekCount(saved.weekCount);
+        if (saved.countNumber) setCountNumber(saved.countNumber);
+        if (saved.counts) setCounts(saved.counts);
       }
     } catch (e) { console.error("Failed to load saved data:", e); }
     setLoaded(true);
@@ -1830,11 +1960,35 @@ function App() {
   useEffect(() => {
     if (!loaded) return;
     try {
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify({ stock, received, lastWeek, session, manualCounts, weekCount }));
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify({ stock, received, lastWeek, session, manualCounts, countNumber, counts }));
     } catch (e) { console.error("Failed to save data:", e); }
-  }, [loaded, stock, received, lastWeek, session, manualCounts, weekCount]);
+  }, [loaded, stock, received, lastWeek, session, manualCounts, countNumber, counts]);
 
-  function closeWeek() {
+  function buildDepletionRows() {
+    const salesTotals = combineSalesSession(session);
+    return MASTER_DATA.map(p => {
+      const current = sumStockForProduct(stock, p.name);
+      const lastWk = lastWeek[p.name] || 0;
+      const rec = received[p.name] || 0;
+      const sales = salesTotals[p.name] || 0;
+      const depletion = lastWk + rec - current;
+      const variance = sales - depletion;
+      return { name: p.name, category: p.category, lastWk, rec, current, depletion, sales, variance };
+    });
+  }
+
+  function closeCount() {
+    const dateStart = window.prompt("Date range start for Count " + countNumber + " (e.g. 6/22/26):", "");
+    if (dateStart === null) return; // cancelled
+    const dateEnd = window.prompt("Date range end for Count " + countNumber + " (e.g. 7/7/26):", "");
+    if (dateEnd === null) return; // cancelled
+    const rows = buildDepletionRows();
+    const archived = {
+      countNumber, dateStart, dateEnd,
+      closedAt: new Date().toLocaleString(),
+      stock, received, lastWeek, session, rows,
+    };
+    setCounts(prev => [...prev, archived]);
     const newLastWeek = {};
     for (const p of MASTER_DATA) newLastWeek[p.name] = sumStockForProduct(stock, p.name);
     setLastWeek(newLastWeek);
@@ -1842,7 +1996,7 @@ function App() {
     setReceived({});
     setSession([]);
     setManualCounts({});
-    setWeekCount(w => w + 1);
+    setCountNumber(n => n + 1);
     setScreen("home");
   }
   function clearAll() {
@@ -1851,7 +2005,8 @@ function App() {
     setLastWeek({});
     setSession([]);
     setManualCounts({});
-    setWeekCount(1);
+    setCountNumber(1);
+    setCounts([]);
     try { window.localStorage.removeItem(STORAGE_KEY); } catch (e) {}
     setScreen("home");
   }
@@ -1864,7 +2019,8 @@ function App() {
     screen === "speedline" && h(SpeedlineScreen, { master: MASTER_DATA, session, setSession, onHome: goHome }),
     screen === "speedlineoutput" && h(SpeedlineOutputScreen, { master: MASTER_DATA, session, onHome: goHome }),
     screen === "manualvsspeedline" && h(ManualVsSpeedlineScreen, { master: MASTER_DATA, manualCounts, setManualCounts, session, onHome: goHome }),
-    screen === "depletion" && h(DepletionScreen, { master: MASTER_DATA, stock, setStock, received, setReceived, lastWeek, setLastWeek, session, onCloseWeek: closeWeek, onHome: goHome })
+    screen === "depletion" && h(DepletionScreen, { master: MASTER_DATA, stock, setStock, received, setReceived, lastWeek, setLastWeek, session, countNumber, onCloseCount: closeCount, onHome: goHome, onNavigate: setScreen }),
+    screen === "counthistory" && h(CountHistoryScreen, { counts, onHome: goHome })
   );
 }
 

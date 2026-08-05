@@ -17,6 +17,8 @@
   }
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 html,body{background:#EFEFEF;color:#111111;font-family:system-ui,-apple-system,'Segoe UI',Arial,sans-serif;font-size:14px;min-height:100vh;-webkit-font-smoothing:antialiased;}
@@ -769,7 +771,7 @@ function processLiquor(text) {
 // category: any liquor used in a Martini, Mule, Old Fashioned, etc. was invisible to
 // the parser. Recipe data below is pulled live from Zazzo's real recipe_database table,
 // since these are the same drink recipes served at both locations.
-const RECIPE_DATABASE = [{"drink": "Aperol Spritz", "maps_to_master_item": "Lamarca Splitz", "oz": 1, "tracked": "Yes"}, {"drink": "Aperol Spritz", "maps_to_master_item": "Aperol", "oz": 1, "tracked": "Yes"}, {"drink": "Basil Grapefruit Smash", "maps_to_master_item": "Zazzo's Vodka", "oz": 2, "tracked": "Yes"}, {"drink": "Breakfast Shot", "maps_to_master_item": "Jameson", "oz": 0.75, "tracked": "Yes"}, {"drink": "Chocolate Martini", "maps_to_master_item": "Tippy Cow", "oz": 1, "tracked": "Yes"}, {"drink": "Chocolate Martini", "maps_to_master_item": "Sobieski Vanilla", "oz": 2, "tracked": "Yes"}, {"drink": "Chocolate Peppermint Martini", "maps_to_master_item": "Zazzo's Vodka", "oz": 1.5, "tracked": "Yes"}, {"drink": "Chocolate Peppermint Martini", "maps_to_master_item": "Tippy Cow", "oz": 1, "tracked": "Yes"}, {"drink": "Cinnamon Toast Crunch Shot", "maps_to_master_item": "Fireball Apple", "oz": 0.75, "tracked": "Yes"}, {"drink": "Cinnamon Toast Crunch Shot", "maps_to_master_item": "Rumchata", "oz": 0.25, "tracked": "Yes"}, {"drink": "Colada", "maps_to_master_item": "Zazzo's Rum", "oz": 1.5, "tracked": "Yes"}, {"drink": "Espresso Martini", "maps_to_master_item": "Kahlua", "oz": 0.5, "tracked": "Yes"}, {"drink": "Espresso Martini", "maps_to_master_item": "Sobieski Vanilla", "oz": 1.5, "tracked": "Yes"}, {"drink": "French 75", "maps_to_master_item": "Lamarca Splitz", "oz": 1, "tracked": "Yes"}, {"drink": "French 75", "maps_to_master_item": "Zazzo's Gin", "oz": 0.5, "tracked": "Yes"}, {"drink": "French Martini", "maps_to_master_item": "Zazzo's Vodka", "oz": 1.5, "tracked": "Yes"}, {"drink": "French Martini", "maps_to_master_item": "Chambord", "oz": 0.25, "tracked": "Yes"}, {"drink": "Green Tea Shot", "maps_to_master_item": "Jameson", "oz": 1, "tracked": "Yes"}, {"drink": "Green Tea Shot", "maps_to_master_item": "Peachtree", "oz": 0.5, "tracked": "Yes"}, {"drink": "Irish Mule", "maps_to_master_item": "Jameson", "oz": 1.5, "tracked": "Yes"}, {"drink": "Lemon Drop Martini", "maps_to_master_item": "Sobieski Citron", "oz": 2, "tracked": "Yes"}, {"drink": "Margarita", "maps_to_master_item": "Zazzo's Tequila", "oz": 2, "tracked": "Yes"}, {"drink": "Mimosa", "maps_to_master_item": "Lamarca Splitz", "oz": 3, "tracked": "Yes"}, {"drink": "O-Bomb", "maps_to_master_item": "Zazzo's Vodka", "oz": 1, "tracked": "Yes"}, {"drink": "Original Mule", "maps_to_master_item": "Zazzo's Vodka", "oz": 1.5, "tracked": "Yes"}, {"drink": "Paloma", "maps_to_master_item": "Zazzo's Tequila", "oz": 1.5, "tracked": "Yes"}, {"drink": "Perfect Manhattan", "maps_to_master_item": "Woodford Reserve", "oz": 2, "tracked": "Yes"}, {"drink": "Pineapple Upside Down", "maps_to_master_item": "Zazzo's Vodka", "oz": 2, "tracked": "Yes"}, {"drink": "Pretty in Pink", "maps_to_master_item": "Zazzo's Vodka", "oz": 0.75, "tracked": "Yes"}, {"drink": "Pretty in Pink", "maps_to_master_item": "Peachtree", "oz": 0.5, "tracked": "Yes"}, {"drink": "Pretty in Pink", "maps_to_master_item": "Zazzo's Rum", "oz": 1.25, "tracked": "Yes"}, {"drink": "Red Sangria", "maps_to_master_item": null, "oz": null, "tracked": "No"}, {"drink": "Revolver", "maps_to_master_item": "Bulleit Bourbon", "oz": 3, "tracked": "Yes"}, {"drink": "Revolver", "maps_to_master_item": "Kahlua", "oz": 1, "tracked": "Yes"}, {"drink": "Scooby Snack Shot", "maps_to_master_item": "Midori", "oz": 0.75, "tracked": "Yes"}, {"drink": "Scooby Snack Shot", "maps_to_master_item": "Zazzo's Rum", "oz": 0.75, "tracked": "Yes"}, {"drink": "Smokey Old Fashioned", "maps_to_master_item": "Zazzo's Bourbon", "oz": 2, "tracked": "Yes"}, {"drink": "Sparkling Cosmo", "maps_to_master_item": "Lamarca Splitz", "oz": 1, "tracked": "Yes"}, {"drink": "Sparkling Cosmo", "maps_to_master_item": "Tito's", "oz": 1.5, "tracked": "Yes"}, {"drink": "Taste of Italy", "maps_to_master_item": "Peachtree", "oz": 0.5, "tracked": "Yes"}, {"drink": "Taste of Italy", "maps_to_master_item": "Lamarca Splitz", "oz": 1, "tracked": "Yes"}, {"drink": "Taste of Italy", "maps_to_master_item": "Zazzo's Vodka", "oz": 0.5, "tracked": "Yes"}, {"drink": "The Calvary Old Fashioned", "maps_to_master_item": "Horse Soldier", "oz": 2, "tracked": "Yes"}, {"drink": "The Venetian Spritz", "maps_to_master_item": "Lamarca Splitz", "oz": 1, "tracked": "Yes"}, {"drink": "The Venetian Spritz", "maps_to_master_item": "Select Aperitif", "oz": 1, "tracked": "Yes"}, {"drink": "Thin Mint Shot", "maps_to_master_item": "Tippy Cow", "oz": 1, "tracked": "Yes"}, {"drink": "Thin Mint Shot", "maps_to_master_item": "Rumple Minze", "oz": 0.5, "tracked": "Yes"}, {"drink": "Tiramisu Martini", "maps_to_master_item": "Kahlua", "oz": 0.25, "tracked": "Yes"}, {"drink": "Tiramisu Martini", "maps_to_master_item": "Zazzo's Vodka", "oz": 2, "tracked": "Yes"}, {"drink": "Vegas Bomb", "maps_to_master_item": "Crown Royal", "oz": 1, "tracked": "Yes"}, {"drink": "White Russian", "maps_to_master_item": "Zazzo's Vodka", "oz": 1.25, "tracked": "Yes"}, {"drink": "White Russian", "maps_to_master_item": "Kahlua", "oz": 0.75, "tracked": "Yes"}, {"drink": "White Sangria", "maps_to_master_item": null, "oz": null, "tracked": "No"}, {"drink": "White Tea Shot (Gummy Bear)", "maps_to_master_item": "Zazzo's Vodka", "oz": 1, "tracked": "Yes"}, {"drink": "White Tea Shot (Gummy Bear)", "maps_to_master_item": "Peachtree", "oz": 0.5, "tracked": "Yes"}, {"drink": "Zazzo's Long Island", "maps_to_master_item": "Zazzo's Gin", "oz": 0.25, "tracked": "Yes"}, {"drink": "Zazzo's Long Island", "maps_to_master_item": "Zazzo's Tequila", "oz": 0.25, "tracked": "Yes"}, {"drink": "Zazzo's Long Island", "maps_to_master_item": "Zazzo's Rum", "oz": 0.25, "tracked": "Yes"}, {"drink": "Zazzo's Long Island", "maps_to_master_item": "Zazzo's Vodka", "oz": 0.25, "tracked": "Yes"}, {"drink": "Zazzo's Mama", "maps_to_master_item": "Zazzo's Rum", "oz": 0.75, "tracked": "Yes"}, {"drink": "Zazzo's Mama", "maps_to_master_item": "Rumhaven", "oz": 0.75, "tracked": "Yes"}, {"drink": "Zazzo's Old Fashioned", "maps_to_master_item": "Whistle Pig", "oz": 2, "tracked": "Yes"}, {"drink": "Zazzo's Paloma", "maps_to_master_item": "Zazzo's Tequila", "oz": 1.5, "tracked": "Yes"}, {"drink": "Zazzo's Rootbeer", "maps_to_master_item": "Captain Morgan", "oz": 1.5, "tracked": "Yes"}];
+const RECIPE_DATABASE = [{"drink": "Aperol Spritz", "maps_to_master_item": "LaMarca Split", "oz": 1, "tracked": "Yes"}, {"drink": "Aperol Spritz", "maps_to_master_item": "Aperol 1L", "oz": 1, "tracked": "Yes"}, {"drink": "Basil Grapefruit Smash", "maps_to_master_item": "Zazzo's Vodka", "oz": 2, "tracked": "Yes"}, {"drink": "Breakfast Shot", "maps_to_master_item": "Jameson", "oz": 0.75, "tracked": "Yes"}, {"drink": "Chocolate Martini", "maps_to_master_item": "Tippy Cow", "oz": 1, "tracked": "Yes"}, {"drink": "Chocolate Martini", "maps_to_master_item": "Sobieski Vanilla", "oz": 2, "tracked": "Yes"}, {"drink": "Chocolate Peppermint Martini", "maps_to_master_item": "Zazzo's Vodka", "oz": 1.5, "tracked": "Yes"}, {"drink": "Chocolate Peppermint Martini", "maps_to_master_item": "Tippy Cow", "oz": 1, "tracked": "Yes"}, {"drink": "Cinnamon Toast Crunch Shot", "maps_to_master_item": "Fireball Apple", "oz": 0.75, "tracked": "Yes"}, {"drink": "Cinnamon Toast Crunch Shot", "maps_to_master_item": "Rumchata", "oz": 0.25, "tracked": "Yes"}, {"drink": "Colada", "maps_to_master_item": "Zazzo's Rum", "oz": 1.5, "tracked": "Yes"}, {"drink": "Espresso Martini", "maps_to_master_item": "Kahlua", "oz": 0.5, "tracked": "Yes"}, {"drink": "Espresso Martini", "maps_to_master_item": "Sobieski Vanilla", "oz": 1.5, "tracked": "Yes"}, {"drink": "French 75", "maps_to_master_item": "Lamarca Splitz", "oz": 1, "tracked": "Yes"}, {"drink": "French 75", "maps_to_master_item": "Zazzo's Gin", "oz": 0.5, "tracked": "Yes"}, {"drink": "French Martini", "maps_to_master_item": "Zazzo's Vodka", "oz": 1.5, "tracked": "Yes"}, {"drink": "French Martini", "maps_to_master_item": "Chambord", "oz": 0.25, "tracked": "Yes"}, {"drink": "Green Tea Shot", "maps_to_master_item": "Jameson", "oz": 1, "tracked": "Yes"}, {"drink": "Green Tea Shot", "maps_to_master_item": "Peachtree", "oz": 0.5, "tracked": "Yes"}, {"drink": "Irish Mule", "maps_to_master_item": "Jameson", "oz": 1.5, "tracked": "Yes"}, {"drink": "Lemon Drop Martini", "maps_to_master_item": "Sobieski Citron", "oz": 2, "tracked": "Yes"}, {"drink": "Margarita", "maps_to_master_item": "Zazzo's Tequila", "oz": 2, "tracked": "Yes"}, {"drink": "Mimosa", "maps_to_master_item": "Lamarca Splitz", "oz": 3, "tracked": "Yes"}, {"drink": "O-Bomb", "maps_to_master_item": "Zazzo's Vodka", "oz": 1, "tracked": "Yes"}, {"drink": "Original Mule", "maps_to_master_item": "Zazzo's Vodka", "oz": 1.5, "tracked": "Yes"}, {"drink": "Paloma", "maps_to_master_item": "Zazzo's Tequila", "oz": 1.5, "tracked": "Yes"}, {"drink": "Perfect Manhattan", "maps_to_master_item": "Woodford Reserve", "oz": 2, "tracked": "Yes"}, {"drink": "Pineapple Upside Down", "maps_to_master_item": "Zazzo's Vodka", "oz": 2, "tracked": "Yes"}, {"drink": "Pretty in Pink", "maps_to_master_item": "Zazzo's Vodka", "oz": 0.75, "tracked": "Yes"}, {"drink": "Pretty in Pink", "maps_to_master_item": "Peachtree", "oz": 0.5, "tracked": "Yes"}, {"drink": "Pretty in Pink", "maps_to_master_item": "Zazzo's Rum", "oz": 1.25, "tracked": "Yes"}, {"drink": "Red Sangria", "maps_to_master_item": null, "oz": null, "tracked": "No"}, {"drink": "Revolver", "maps_to_master_item": "Bulleit Bourbon", "oz": 3, "tracked": "Yes"}, {"drink": "Revolver", "maps_to_master_item": "Kahlua", "oz": 1, "tracked": "Yes"}, {"drink": "Scooby Snack Shot", "maps_to_master_item": "Midori", "oz": 0.75, "tracked": "Yes"}, {"drink": "Scooby Snack Shot", "maps_to_master_item": "Zazzo's Rum", "oz": 0.75, "tracked": "Yes"}, {"drink": "Smokey Old Fashioned", "maps_to_master_item": "Zazzo's Bourbon", "oz": 2, "tracked": "Yes"}, {"drink": "Sparkling Cosmo", "maps_to_master_item": "Lamarca Splitz", "oz": 1, "tracked": "Yes"}, {"drink": "Sparkling Cosmo", "maps_to_master_item": "Tito's", "oz": 1.5, "tracked": "Yes"}, {"drink": "Taste of Italy", "maps_to_master_item": "Peachtree", "oz": 0.5, "tracked": "Yes"}, {"drink": "Taste of Italy", "maps_to_master_item": "Lamarca Splitz", "oz": 1, "tracked": "Yes"}, {"drink": "Taste of Italy", "maps_to_master_item": "Zazzo's Vodka", "oz": 0.5, "tracked": "Yes"}, {"drink": "The Calvary Old Fashioned", "maps_to_master_item": "Horse Soldier", "oz": 2, "tracked": "Yes"}, {"drink": "Thin Mint Shot", "maps_to_master_item": "Tippy Cow", "oz": 1, "tracked": "Yes"}, {"drink": "Thin Mint Shot", "maps_to_master_item": "Rumple Minze", "oz": 0.5, "tracked": "Yes"}, {"drink": "Tiramisu Martini", "maps_to_master_item": "Kahlua", "oz": 0.25, "tracked": "Yes"}, {"drink": "Tiramisu Martini", "maps_to_master_item": "Zazzo's Vodka", "oz": 2, "tracked": "Yes"}, {"drink": "Vegas Bomb", "maps_to_master_item": "Crown Royal", "oz": 1, "tracked": "Yes"}, {"drink": "White Russian", "maps_to_master_item": "Zazzo's Vodka", "oz": 1.25, "tracked": "Yes"}, {"drink": "White Russian", "maps_to_master_item": "Kahlua", "oz": 0.75, "tracked": "Yes"}, {"drink": "White Sangria", "maps_to_master_item": null, "oz": null, "tracked": "No"}, {"drink": "White Tea Shot (Gummy Bear)", "maps_to_master_item": "Zazzo's Vodka", "oz": 1, "tracked": "Yes"}, {"drink": "White Tea Shot (Gummy Bear)", "maps_to_master_item": "Peachtree", "oz": 0.5, "tracked": "Yes"}, {"drink": "Zazzo's Long Island", "maps_to_master_item": "Zazzo's Gin", "oz": 0.25, "tracked": "Yes"}, {"drink": "Zazzo's Long Island", "maps_to_master_item": "Zazzo's Tequila", "oz": 0.25, "tracked": "Yes"}, {"drink": "Zazzo's Long Island", "maps_to_master_item": "Zazzo's Rum", "oz": 0.25, "tracked": "Yes"}, {"drink": "Zazzo's Long Island", "maps_to_master_item": "Zazzo's Vodka", "oz": 0.25, "tracked": "Yes"}, {"drink": "Zazzo's Mama", "maps_to_master_item": "Zazzo's Rum", "oz": 0.75, "tracked": "Yes"}, {"drink": "Zazzo's Mama", "maps_to_master_item": "Rumhaven", "oz": 0.75, "tracked": "Yes"}, {"drink": "Zazzo's Old Fashioned", "maps_to_master_item": "Whistle Pig", "oz": 2, "tracked": "Yes"}, {"drink": "Zazzo's Paloma", "maps_to_master_item": "Zazzo's Tequila", "oz": 1.5, "tracked": "Yes"}, {"drink": "Zazzo's Rootbeer", "maps_to_master_item": "Captain Morgan", "oz": 1.5, "tracked": "Yes"}];
 const SPECIALTY_NAME_FIX = {
     "Expresso Martini": "Espresso Martini",
     "Sambucca": "Sambuca",
@@ -798,6 +800,11 @@ const SPECIALTY_STRAIGHT_POUR = {
     "Rumchata": { ingredient: "Rumchata", oz: 1.5 },
     "Rumpleminze": { ingredient: "Rumplemintz", oz: 1.5 },
 };
+// LaMarca Split used in cocktails (Aperol Spritz, etc.) is the same single-serve
+// mini-bottle as the retail wine item — one whole split per drink, not an oz pour.
+// Mirrors the WINE_UNIT_SOLD fix above for the same reason: dividing by a bottle-oz
+// constant and then needing to multiply back by it is a no-op that hides the real bug.
+const SPECIALTY_UNIT_SOLD = new Set(["LaMarca Split"]);
 function processSpecialty(text) {
     const rows = parseSalesByItemLines(text);
     const recipeMap = {};
@@ -806,8 +813,11 @@ function processSpecialty(text) {
         if (!recipeMap[r.drink]) recipeMap[r.drink] = [];
         recipeMap[r.drink].push({ ingredient: r.maps_to_master_item, oz: r.oz });
     }
-    const ozByItem = {}, flags = [];
-    function addDepletion(ingredient, amount) { ozByItem[ingredient] = (ozByItem[ingredient] || 0) + amount; }
+    const ozByItem = {}, unitByItem = {}, flags = [];
+    function addDepletion(ingredient, amount) {
+        if (SPECIALTY_UNIT_SOLD.has(ingredient)) { unitByItem[ingredient] = (unitByItem[ingredient] || 0) + amount; return; }
+        ozByItem[ingredient] = (ozByItem[ingredient] || 0) + amount;
+    }
     for (const row of rows) {
         if (SPECIALTY_STRAIGHT_POUR[row.name]) {
             const { ingredient, oz } = SPECIALTY_STRAIGHT_POUR[row.name];
@@ -821,6 +831,7 @@ function processSpecialty(text) {
     }
     const bottles = {};
     for (const [item, oz] of Object.entries(ozByItem)) bottles[item] = Math.round((oz / LIQUOR_BOTTLE_OZ) * 100) / 100;
+    for (const [item, qty] of Object.entries(unitByItem)) bottles[item] = qty;
     return { bottles, flags };
 }
 
@@ -850,18 +861,41 @@ function processWine(text) {
   for (const [item, qty] of Object.entries(unitByItem)) bottles[item] = qty;
   return { bottles, flags };
 }
-function processCarryout(text) {
+// Normalize for name matching: lowercase, strip punctuation/whitespace so minor
+// formatting differences between Speedline's item name and Master's name don't
+// block a match (e.g. "Bud Light 6pk" vs "Bud Light").
+function normalizeForMatch(s) {
+  return (s || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+}
+function processCarryout(text, master) {
   const rows = parseSalesByItemLines(text);
   const items = {}, flags = [];
+  const masterNames = (master || []).map(p => p.name);
+  const normIndex = masterNames.map(n => ({ name: n, norm: normalizeForMatch(n) }));
   for (const r of rows) {
     const mapping = PLU_MAPS.carryout[r.plu];
-    if (!mapping) { flags.push(`Unmapped Carryout PLU ${r.plu} ("${r.name}", qty ${r.qty})`); continue; }
-    items[mapping.item] = (items[mapping.item] || 0) + r.qty * (mapping.mult || 1);
+    if (mapping) {
+      items[mapping.item] = (items[mapping.item] || 0) + r.qty * (mapping.mult || 1);
+      continue;
+    }
+    // No PLU mapping on file — before discarding, check the item name against every
+    // Master product name. A confident name match still gets counted (with a flag
+    // noting the fallback was used, so it can be reviewed and given a real PLU
+    // mapping) rather than silently vanishing from the sold total.
+    const rowNorm = normalizeForMatch(r.name);
+    const nameMatch = normIndex.find(m => m.norm === rowNorm) ||
+      normIndex.find(m => m.norm.length > 3 && (rowNorm.includes(m.norm) || m.norm.includes(rowNorm)));
+    if (nameMatch) {
+      items[nameMatch.name] = (items[nameMatch.name] || 0) + r.qty;
+      flags.push(`Unmapped Carryout PLU ${r.plu} ("${r.name}", qty ${r.qty}) — matched by name to "${nameMatch.name}" and counted. Add PLU ${r.plu} to the carryout map to remove this fallback.`);
+    } else {
+      flags.push(`Unmapped Carryout PLU ${r.plu} ("${r.name}", qty ${r.qty}) — no name match in Master either. NOT counted — add this PLU to the carryout map.`);
+    }
   }
   return { items, flags };
 }
 
-function runParser(reportType, text) {
+function runParser(reportType, text, master) {
   switch (reportType) {
     case "beer": {
       const { bottles, kegs, flags } = processBeer(text);
@@ -869,7 +903,7 @@ function runParser(reportType, text) {
     }
     case "liquor": return processLiquor(text);
     case "wine": return processWine(text);
-    case "carryout": { const { items, flags } = processCarryout(text); return { bottles: items, flags }; }
+    case "carryout": { const { items, flags } = processCarryout(text, master); return { bottles: items, flags }; }
     case "bucket": { const { items, flags } = processModifierCategory("bucket", text); return { bottles: items, flags }; }
     case "bucket_bottles": { const { items, flags } = processModifierCategory("bucket", text); return { bottles: items, flags }; }
     case "highnoon": { const { items, flags } = processModifierCategory("highnoon", text); return { bottles: items, flags }; }
@@ -925,7 +959,7 @@ function sumStockForProduct(stock, name) {
 
 /* ───────────────────────── NAV ───────────────────────── */
 /* ───────────────────────── HOME (tile menu) ───────────────────────── */
-const APP_VERSION = "v5.2";
+const APP_VERSION = "v7.0";
 
 function Home({ onNavigate, onClearAll }) {
   const tapCountRef = useRef(0);
@@ -976,14 +1010,58 @@ function Home({ onNavigate, onClearAll }) {
 
 /* Shared per-screen header — every screen renders its own copy of this,
    same classes every time, with a Home button (and Print button where used). */
-function ScreenHeader({ onHome, onPrint }) {
+function ScreenHeader({ onHome, onExportPDF }) {
   return h("header", { className: "H no-print" },
     h("div", { className: "H-logo" }, "Darien ", h("span", { style: { fontSize: 12, opacity: 0.75 } }, APP_VERSION)),
     h("div", { className: "H-right" },
-      onPrint && h("button", { className: "B B-ghost", onClick: onPrint }, "🖨️ Print"),
+      onExportPDF && h("button", { className: "B B-ghost", onClick: onExportPDF }, "⬇️ Download PDF"),
       h("button", { className: "B B-ghost", onClick: onHome }, "← Home")
     )
   );
+}
+
+// Generic PDF builder — replaces browser print entirely so long reports never get
+// silently truncated. Each item in `sections` becomes its own table with a repeating
+// header row; passing multiple sections (e.g. one per location) puts each on its own
+// page automatically via autoTable's startY/pageBreak handling.
+function downloadPDF({ filename, title, subtitle, sections }) {
+  const doc = new window.jspdf.jsPDF({ orientation: "portrait", unit: "pt", format: "letter" });
+  const pageWidth = doc.internal.pageSize.getWidth();
+  sections.forEach((section, idx) => {
+    if (idx > 0) doc.addPage();
+    doc.setFontSize(13);
+    doc.setTextColor(200, 16, 46);
+    doc.text(title, 40, 40);
+    doc.setFontSize(9);
+    doc.setTextColor(51, 51, 51);
+    doc.text((section.heading || subtitle || "").toUpperCase(), 40, 56);
+    doc.setTextColor(85, 85, 85);
+    doc.text("Printed: " + new Date().toLocaleDateString() + (section.rightNote ? "   " + section.rightNote : ""), pageWidth - 40, 40, { align: "right" });
+    doc.autoTable({
+      startY: 66,
+      head: [section.columns.map(c => c.header)],
+      body: section.rows.map(r => section.columns.map(c => (r[c.key] ?? ""))),
+      styles: { fontSize: 8, cellPadding: 3 },
+      headStyles: { fillColor: [165, 14, 31], textColor: 255, fontStyle: "bold" },
+      columnStyles: Object.fromEntries(section.columns.map((c, i) => [i, { halign: c.align || "left", cellWidth: c.width || "auto" }])),
+      margin: { top: 66, left: 40, right: 40 },
+    });
+    if (section.footerLines && section.footerLines.length) {
+      let y = doc.lastAutoTable.finalY + 16;
+      doc.setFontSize(9);
+      doc.setTextColor(200, 16, 46);
+      doc.text(section.footerTitle || "", 40, y);
+      y += 12;
+      doc.setFontSize(8);
+      doc.setTextColor(51, 51, 51);
+      for (const line of section.footerLines) {
+        if (y > doc.internal.pageSize.getHeight() - 40) { doc.addPage(); y = 40; }
+        doc.text("• " + line, 40, y);
+        y += 12;
+      }
+    }
+  });
+  doc.save(filename);
 }
 
 /* Dedicated print sheet — hidden on screen, shown only via @media print.
@@ -1034,8 +1112,21 @@ function StockScreen({ master, stock, setStock, onHome }) {
     const num = val === "" ? null : parseFloat(val);
     setStock(prev => ({ ...prev, [name]: { ...(prev[name] || {}), [loc]: num } }));
   }
+  function exportPDF() {
+    const sections = LOCATIONS.filter(loc => groups[loc] && groups[loc].length).map(loc => ({
+      heading: "Current Stock — " + loc,
+      columns: [
+        { key: "name", header: "Product", width: 260 },
+        { key: "category", header: "Category", width: 130 },
+        { key: "count", header: "Count", width: 100, align: "right" },
+      ],
+      rows: groups[loc].map(p => ({ name: p.name, category: p.category, count: "" })),
+      rightNote: "Counted by: _________________",
+    }));
+    downloadPDF({ filename: "Darien-Stock.pdf", title: "DARIEN LIQUOR INVENTORY", sections });
+  }
   return h(React.Fragment, null,
-    h(ScreenHeader, { onHome, onPrint: () => window.print() }),
+    h(ScreenHeader, { onHome, onExportPDF: exportPDF }),
     h(StockPrintSheet, { master, groups }),
     h("main", { className: "Page" },
       h("div", { className: "Card" },
@@ -1072,8 +1163,24 @@ function ReceivedScreen({ master, received, setReceived, onHome }) {
     const num = val === "" ? null : parseFloat(val);
     setReceived(prev => ({ ...prev, [name]: num }));
   }
+  function exportPDF() {
+    downloadPDF({
+      filename: "Darien-Received.pdf",
+      title: "DARIEN LIQUOR INVENTORY",
+      sections: [{
+        heading: "Received This Week",
+        columns: [
+          { key: "name", header: "Product", width: 220 },
+          { key: "category", header: "Category", width: 110 },
+          { key: "vendor", header: "Vendor", width: 100 },
+          { key: "received", header: "Received", width: 90, align: "right" },
+        ],
+        rows: sorted.map(p => ({ name: p.name, category: p.category, vendor: p.vendor || "", received: received[p.name] ?? "" })),
+      }],
+    });
+  }
   return h(React.Fragment, null,
-    h(ScreenHeader, { onHome, onPrint: () => window.print() }),
+    h(ScreenHeader, { onHome, onExportPDF: exportPDF }),
     h("main", { className: "Page" },
       h("div", { className: "Card" },
         h("div", { className: "Card-title" }, "Received This Week"),
@@ -1101,7 +1208,7 @@ function ReceivedScreen({ master, received, setReceived, onHome }) {
 }
 
 /* ───────────────────────── SPEEDLINE SCREEN ───────────────────────── */
-function SpeedlineScreen({ session, setSession, onHome }) {
+function SpeedlineScreen({ master, session, setSession, onHome }) {
   const [manualType, setManualType] = useState("");
   const [rawText, setRawText] = useState("");
   const [detected, setDetected] = useState(null);
@@ -1120,7 +1227,7 @@ function SpeedlineScreen({ session, setSession, onHome }) {
       const proceed = window.confirm("This will clear the current Speedline data and replace it with this report. Continue?");
       if (!proceed) return;
     }
-    const result = runParser(type, rawText);
+    const result = runParser(type, rawText, master);
     setSession([{ label: REPORT_LABELS[type] || type, type, result, addedAt: new Date().toLocaleTimeString() }]);
     setRawText(""); setDetected(null); setManualType("");
   }
@@ -1168,7 +1275,7 @@ function SpeedlineScreen({ session, setSession, onHome }) {
     const allFlags = [];
     const typesUsed = [];
     for (const [type, info] of Object.entries(detectedFiles)) {
-      const result = runParser(type, info.text);
+      const result = runParser(type, info.text, master);
       if (result.bottles) mergeInto(combinedBottles, result.bottles);
       if (result.kegs) mergeInto(combinedKegs, result.kegs);
       if (result.flags) allFlags.push(...result.flags);
@@ -1348,8 +1455,26 @@ function SpeedlineOutputScreen({ master, session, onHome }) {
   const missingPLU = getProductsMissingPLU(master).sort((a, b) => orderGuideRank(a.name) - orderGuideRank(b.name));
   const lastParsedAt = session.length > 0 ? session[session.length - 1].addedAt : null;
 
+  function exportPDF() {
+    downloadPDF({
+      filename: "Darien-Speedline-Output.pdf",
+      title: "DARIEN LIQUOR INVENTORY",
+      sections: [{
+        heading: "Speedline Sales — Week Summary",
+        columns: [
+          { key: "name", header: "Product", width: 260 },
+          { key: "category", header: "Category", width: 120 },
+          { key: "sales", header: "Sold", width: 90, align: "right" },
+        ],
+        rows: rows.map(r => ({ name: r.name, category: r.category, sales: r.sales ? Math.round(r.sales * 100) / 100 : "" })),
+        footerTitle: missingPLU.length > 0 ? ("The following items did not run — could not be processed (" + missingPLU.length + ")") : null,
+        footerLines: missingPLU.map(p => p.name + " (" + p.category + ") — no PLU on file"),
+      }],
+    });
+  }
+
   return h(React.Fragment, null,
-    h(ScreenHeader, { onHome, onPrint: () => window.print() }),
+    h(ScreenHeader, { onHome, onExportPDF: exportPDF }),
     h(SpeedlineOutputPrintSheet, { rows, missingPLU }),
     h("main", { className: "Page" },
       h("div", { className: "Card", style: { background: lastParsedAt ? "#EFF8F1" : "#FDECEA", border: lastParsedAt ? "1px solid #1B6B3A" : "1px solid #F5C0C8" } },
@@ -1475,8 +1600,31 @@ function ManualVsSpeedlineScreen({ master, manualCounts, setManualCounts, sessio
     return { name: p.name, category: p.category, manual, parser, diff };
   });
 
+  function exportPDF() {
+    downloadPDF({
+      filename: "Darien-Manual-vs-Speedline.pdf",
+      title: "DARIEN LIQUOR INVENTORY",
+      sections: [{
+        heading: "Manual vs Speedline Comparison",
+        columns: [
+          { key: "name", header: "Product", width: 200 },
+          { key: "category", header: "Category", width: 100 },
+          { key: "manual", header: "Manual", width: 80, align: "right" },
+          { key: "parser", header: "Parser", width: 80, align: "right" },
+          { key: "diff", header: "Diff", width: 80, align: "right" },
+        ],
+        rows: rows.map(r => ({
+          name: r.name, category: r.category,
+          manual: r.manual !== null ? fmt2(r.manual) : "",
+          parser: r.parser ? fmt2(r.parser) : "",
+          diff: r.diff === null ? "" : fmt2(r.diff),
+        })),
+      }],
+    });
+  }
+
   return h(React.Fragment, null,
-    h(ScreenHeader, { onHome, onPrint: () => window.print() }),
+    h(ScreenHeader, { onHome, onExportPDF: exportPDF }),
     h(ManualVsSpeedlinePrintSheet, { rows }),
     h("main", { className: "Page" },
       h("div", { className: "btnrow", style: { marginBottom: 12 } },
@@ -1516,10 +1664,66 @@ function ManualVsSpeedlineScreen({ master, manualCounts, setManualCounts, sessio
 }
 
 /* ───────────────────────── DEPLETION REPORT SCREEN ───────────────────────── */
-function DepletionScreen({ master, stock, received, lastWeek, session, onCloseWeek, onHome }) {
+function DepletionScreen({ master, stock, setStock, received, setReceived, lastWeek, setLastWeek, session, onCloseWeek, onHome }) {
+  const [importMsg, setImportMsg] = useState("");
+  const importRef = useRef(null);
   const salesTotals = combineSalesSession(session);
   const masterNames = new Set(master.map(p => p.name));
   const sorted = [...master].sort((a, b) => orderGuideRank(a.name) - orderGuideRank(b.name));
+
+  // Imports Total/Last Week/Received directly from Stephanie's Order Guide spreadsheet.
+  // Sold is deliberately NOT read from this file — Sold only ever comes from the
+  // Speedline parser session, never from this import.
+  async function handleOrderGuideImport(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    try {
+      const buf = await file.arrayBuffer();
+      const wb = XLSX.read(buf, { type: "array" });
+      const sheetName = wb.SheetNames.find(n => n.trim().toLowerCase() === "order guide") || wb.SheetNames.find(n => /order guide/i.test(n));
+      if (!sheetName) { setImportMsg("Couldn't find an \"Order Guide\" tab in that file."); return; }
+      const rows = XLSX.utils.sheet_to_json(wb.Sheets[sheetName], { header: 1, raw: true });
+      const header = (rows[0] || []).map(h => (h || "").toString().trim().toLowerCase());
+      const nameIdx = header.indexOf("product name");
+      const totalIdx = header.indexOf("total");
+      const lastWeekIdx = header.indexOf("last week");
+      const receivedIdx = header.indexOf("received");
+      if (nameIdx === -1 || totalIdx === -1 || lastWeekIdx === -1 || receivedIdx === -1) {
+        setImportMsg("That Order Guide tab is missing one of: Product Name, Total, Last Week, Received columns.");
+        return;
+      }
+      const masterList = master.map(p => p.name);
+      const normIndex = masterList.map(n => ({ name: n, norm: normalizeForMatch(n) }));
+      const newStock = {}, newLastWeek = {}, newReceived = {};
+      const unmatched = [];
+      let matched = 0;
+      for (let i = 1; i < rows.length; i++) {
+        const row = rows[i];
+        if (!row || !row[nameIdx]) continue;
+        const rawName = row[nameIdx].toString().trim();
+        const rowNorm = normalizeForMatch(rawName);
+        const hit = normIndex.find(m => m.norm === rowNorm);
+        if (!hit) { unmatched.push(rawName); continue; }
+        const total = parseFloat(row[totalIdx]);
+        const lw = parseFloat(row[lastWeekIdx]);
+        const rec = parseFloat(row[receivedIdx]);
+        newStock[hit.name] = { front: isNaN(total) ? 0 : total, bar: 0, office: 0, outside: 0 };
+        newLastWeek[hit.name] = isNaN(lw) ? 0 : lw;
+        newReceived[hit.name] = isNaN(rec) ? 0 : rec;
+        matched++;
+      }
+      setStock(newStock);
+      setLastWeek(newLastWeek);
+      setReceived(newReceived);
+      setImportMsg(
+        `Imported ${matched} products (Total, Last Week, Received) from "${sheetName}".` +
+        (unmatched.length ? ` ${unmatched.length} row(s) had no matching Master product and were skipped: ${unmatched.slice(0, 8).join(", ")}${unmatched.length > 8 ? "…" : ""}` : "")
+      );
+    } catch (err) {
+      setImportMsg("Couldn't read that file — make sure it's the Order Guide .xlsx. (" + err.message + ")");
+    }
+    if (importRef.current) importRef.current.value = "";
+  }
 
   const rows = sorted.map(p => {
     const current = sumStockForProduct(stock, p.name);
@@ -1536,6 +1740,15 @@ function DepletionScreen({ master, stock, received, lastWeek, session, onCloseWe
   return h(React.Fragment, null,
     h(ScreenHeader, { onHome }),
     h("main", { className: "Page" },
+    h("div", { className: "Card" },
+      h("div", { className: "Card-title" }, "Import from Order Guide"),
+      h("div", { className: "empty" }, "Upload Stephanie's spreadsheet — pulls Total, Last Week, and Received straight from the Order Guide tab. Sold always comes from the Speedline parser only, never from this file. Replaces all current Total/Last Week/Received values with what's in the file."),
+      h("div", { className: "btnrow" },
+        h("input", { type: "file", accept: ".xlsx", ref: importRef, onChange: handleOrderGuideImport, style: { display: "none" } }),
+        h("button", { className: "B B-red", onClick: () => importRef.current && importRef.current.click() }, "📥 Upload Order Guide Spreadsheet")
+      ),
+      importMsg && h("div", { className: "empty", style: { marginTop: 8 } }, importMsg)
+    ),
     h("div", { className: "Card" },
       h("div", { className: "Card-title" }, "Depletion Report"),
       h("div", { className: "empty" },
@@ -1648,10 +1861,10 @@ function App() {
     screen === "home" && h(Home, { onNavigate: setScreen, onClearAll: clearAll }),
     screen === "stock" && h(StockScreen, { master: MASTER_DATA, stock, setStock, onHome: goHome }),
     screen === "received" && h(ReceivedScreen, { master: MASTER_DATA, received, setReceived, onHome: goHome }),
-    screen === "speedline" && h(SpeedlineScreen, { session, setSession, onHome: goHome }),
+    screen === "speedline" && h(SpeedlineScreen, { master: MASTER_DATA, session, setSession, onHome: goHome }),
     screen === "speedlineoutput" && h(SpeedlineOutputScreen, { master: MASTER_DATA, session, onHome: goHome }),
     screen === "manualvsspeedline" && h(ManualVsSpeedlineScreen, { master: MASTER_DATA, manualCounts, setManualCounts, session, onHome: goHome }),
-    screen === "depletion" && h(DepletionScreen, { master: MASTER_DATA, stock, received, lastWeek, session, onCloseWeek: closeWeek, onHome: goHome })
+    screen === "depletion" && h(DepletionScreen, { master: MASTER_DATA, stock, setStock, received, setReceived, lastWeek, setLastWeek, session, onCloseWeek: closeWeek, onHome: goHome })
   );
 }
 

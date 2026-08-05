@@ -991,7 +991,7 @@ function sumStockForProduct(stock, name) {
 
 /* ───────────────────────── NAV ───────────────────────── */
 /* ───────────────────────── HOME (tile menu) ───────────────────────── */
-const APP_VERSION = "v9.1";
+const APP_VERSION = "v9.2";
 
 function Home({ onNavigate, onClearAll }) {
   const tapCountRef = useRef(0);
@@ -1056,7 +1056,7 @@ function ScreenHeader({ onHome, onExportPDF }) {
 // in-progress count. Same pattern as Westmont's ATabs — sits directly under the header.
 function CountTabs({ archivedCounts, selectedCount, setSelectedCount }) {
   return h("div", { className: "CTabs" },
-    [...archivedCounts].reverse().map(c =>
+    archivedCounts.map(c =>
       h("button", {
         key: c.id,
         className: "CTab" + (selectedCount === c.id ? " on" : ""),
@@ -1507,13 +1507,16 @@ function SpeedlineOutputPrintSheet({ rows, missingPLU }) {
   );
 }
 
-function SpeedlineOutputScreen({ master, session, onHome }) {
+function SpeedlineOutputScreen({ master, session, onHome, archivedCounts, selectedCount, setSelectedCount }) {
   const salesTotals = combineSalesSession(session);
   const masterNames = new Set(master.map(p => p.name));
   const sorted = [...master].sort((a, b) => orderGuideRank(a.name) - orderGuideRank(b.name));
-  const rows = sorted.map(p => ({ name: p.name, category: p.category, sales: salesTotals[p.name] || 0 }));
-  const unrecognized = Object.entries(salesTotals).filter(([name]) => !masterNames.has(name));
-  const missingPLU = getProductsMissingPLU(master).sort((a, b) => orderGuideRank(a.name) - orderGuideRank(b.name));
+  const archived = selectedCount !== "current" ? archivedCounts.find(c => c.id === selectedCount) : null;
+  const rows = archived
+    ? sorted.map(p => ({ name: p.name, category: p.category, sales: (archived.pos_sales || {})[p.name] || 0 }))
+    : sorted.map(p => ({ name: p.name, category: p.category, sales: salesTotals[p.name] || 0 }));
+  const unrecognized = archived ? [] : Object.entries(salesTotals).filter(([name]) => !masterNames.has(name));
+  const missingPLU = archived ? [] : getProductsMissingPLU(master).sort((a, b) => orderGuideRank(a.name) - orderGuideRank(b.name));
   const lastParsedAt = session.length > 0 ? session[session.length - 1].addedAt : null;
 
   function exportPDF() {
@@ -1521,7 +1524,7 @@ function SpeedlineOutputScreen({ master, session, onHome }) {
       filename: "Darien-Speedline-Output.pdf",
       title: "DARIEN LIQUOR INVENTORY",
       sections: [{
-        heading: "Speedline Sales — Week Summary",
+        heading: (archived ? archived.week_label : "Current") + " — Speedline Sales",
         columns: [
           { key: "name", header: "Product", width: 260 },
           { key: "category", header: "Category", width: 120 },
@@ -1536,16 +1539,13 @@ function SpeedlineOutputScreen({ master, session, onHome }) {
 
   return h(React.Fragment, null,
     h(ScreenHeader, { onHome, onExportPDF: exportPDF }),
+    h(CountTabs, { archivedCounts, selectedCount, setSelectedCount }),
     h(SpeedlineOutputPrintSheet, { rows, missingPLU }),
-    h("main", { className: "Page" },
-      h("div", { className: "Card", style: { background: lastParsedAt ? "#EFF8F1" : "#FDECEA", border: lastParsedAt ? "1px solid #1B6B3A" : "1px solid #F5C0C8" } },
+    h("main", { className: "Page", style: { paddingTop: 20 } },
+      !archived && h("div", { className: "Card", style: { background: lastParsedAt ? "#EFF8F1" : "#FDECEA", border: lastParsedAt ? "1px solid #1B6B3A" : "1px solid #F5C0C8" } },
         h("div", { style: { fontSize: 12, fontWeight: 700, color: lastParsedAt ? "#1B6B3A" : "#C8102E" } },
-          lastParsedAt ? ("✓ Session has data — last parsed at " + lastParsedAt) : "⚠ No session data yet — nothing has been parsed since the last clear"
+          lastParsedAt ? ("✓ Session has data — last parsed at " + lastParsedAt) : "⚠ No session data yet"
         )
-      ),
-      h("div", { className: "Card" },
-        h("div", { className: "Card-title" }, "Speedline Output — Sales This Week"),
-        h("div", { className: "empty" }, "Every Master Guide product and what sold this week, pulled from the Speedline reports added on the Sales Reports screen.")
       ),
       h("div", { className: "Card" },
         h("table", null,
@@ -1619,11 +1619,12 @@ function ManualVsSpeedlinePrintSheet({ rows }) {
   );
 }
 
-function ManualVsSpeedlineScreen({ master, manualCounts, setManualCounts, session, onHome }) {
+function ManualVsSpeedlineScreen({ master, manualCounts, setManualCounts, session, onHome, archivedCounts, selectedCount, setSelectedCount }) {
   const salesTotals = combineSalesSession(session);
   const sorted = [...master].sort((a, b) => orderGuideRank(a.name) - orderGuideRank(b.name));
   const [uploadMsg, setUploadMsg] = useState(null);
   const fileRef = useRef(null);
+  const archived = selectedCount !== "current" ? archivedCounts.find(c => c.id === selectedCount) : null;
 
   async function handleOrderGuideUpload(e) {
     const file = e.target.files[0];
@@ -1655,8 +1656,8 @@ function ManualVsSpeedlineScreen({ master, manualCounts, setManualCounts, sessio
   }
 
   const rows = sorted.map(p => {
-    const manual = manualCounts[p.name] ?? null;
-    const parser = salesTotals[p.name] || 0;
+    const manual = archived ? null : (manualCounts[p.name] ?? null);
+    const parser = archived ? ((archived.pos_sales || {})[p.name] || 0) : (salesTotals[p.name] || 0);
     const diff = manual === null ? null : Math.round((parser - manual) * 100) / 100;
     return { name: p.name, category: p.category, manual, parser, diff };
   });
@@ -1666,7 +1667,7 @@ function ManualVsSpeedlineScreen({ master, manualCounts, setManualCounts, sessio
       filename: "Darien-Manual-vs-Speedline.pdf",
       title: "DARIEN LIQUOR INVENTORY",
       sections: [{
-        heading: "Manual vs Speedline Comparison",
+        heading: (archived ? archived.week_label : "Current") + " — Manual vs Speedline",
         columns: [
           { key: "name", header: "Product", width: 200 },
           { key: "category", header: "Category", width: 100 },
@@ -1686,9 +1687,10 @@ function ManualVsSpeedlineScreen({ master, manualCounts, setManualCounts, sessio
 
   return h(React.Fragment, null,
     h(ScreenHeader, { onHome, onExportPDF: exportPDF }),
+    h(CountTabs, { archivedCounts, selectedCount, setSelectedCount }),
     h(ManualVsSpeedlinePrintSheet, { rows }),
-    h("main", { className: "Page" },
-      h("div", { className: "btnrow", style: { marginBottom: 12 } },
+    h("main", { className: "Page", style: { paddingTop: 20 } },
+      !archived && h("div", { className: "btnrow", style: { marginBottom: 12 } },
         h("button", { className: "B B-outline", onClick: () => fileRef.current && fileRef.current.click() }, "📤 Upload"),
         h("input", { type: "file", accept: ".xlsx", ref: fileRef, onChange: handleOrderGuideUpload, style: { display: "none" } }),
         uploadMsg && h("span", { className: "detect", style: { marginLeft: 10 } }, uploadMsg)
@@ -1725,7 +1727,8 @@ function ManualVsSpeedlineScreen({ master, manualCounts, setManualCounts, sessio
 }
 
 /* ───────────────────────── DEPLETION REPORT SCREEN ───────────────────────── */
-function DepletionScreen({ master, stock, setStock, received, setReceived, lastWeek, setLastWeek, session, countNumber, onCloseCount, onHome, onNavigate, archivedCounts, selectedCount, setSelectedCount }) {
+function DepletionScreen({ master, stock, setStock, received, setReceived, lastWeek, setLastWeek, session, onCloseCount, onHome, onNavigate, archivedCounts, selectedCount, setSelectedCount }) {
+  const countNumber = archivedCounts.length + 1;
   const [importMsg, setImportMsg] = useState("");
   const [expandedRow, setExpandedRow] = useState(null);
   const importRef = useRef(null);
@@ -1847,29 +1850,22 @@ function DepletionScreen({ master, stock, setStock, received, setReceived, lastW
     h("div", { className: "Card" },
       h("table", null,
         h("thead", null, h("tr", null,
-          h("th", null, "Product"), h("th", null, "Cat"),
-          h("th", { style: { textAlign: "right" } }, "Last Wk"),
-          h("th", { style: { textAlign: "right" } }, "Received"),
-          h("th", { style: { textAlign: "right" } }, "Current"),
-          h("th", { style: { textAlign: "right" } }, "Depletion"),
-          h("th", { style: { textAlign: "right" } }, "Sales"),
-          h("th", { style: { textAlign: "right" } }, "Variance")
+          h("th", null, "Product"),
+          h("th", { style: { textAlign: "center" } }, "Depletion"),
+          h("th", { style: { textAlign: "center" } }, "POS Sales"),
+          h("th", { style: { textAlign: "center" } }, "Variance")
         )),
         h("tbody", null,
           rows.map(r => [
             h("tr", { key: r.name, onClick: () => setExpandedRow(expandedRow === r.name ? null : r.name), style: { cursor: "pointer" } },
               h("td", null, r.name),
-              h("td", null, r.category),
-              h("td", { className: "qty" }, r.lastWk ? fmt2(r.lastWk) : ""),
-              h("td", { className: "qty" }, r.rec ? fmt2(r.rec) : ""),
-              h("td", { className: "qty" }, r.current ? fmt2(r.current) : ""),
               h("td", { className: "qty" }, Math.round(r.depletion * 100) / 100),
               h("td", { className: "qty" }, Math.round(r.sales * 100) / 100),
               h("td", { className: "qty", style: { color: r.variance < -0.01 ? "#C8102E" : r.variance > 0.01 ? "#B36A00" : "#1B6B3A", fontWeight: 600 } },
                 Math.round(r.variance * 100) / 100)
             ),
             expandedRow === r.name && h("tr", { key: r.name + "-math" },
-              h("td", { colSpan: 8, style: { background: "#FAFAFA", padding: "10px 14px", fontSize: 12.5, fontFamily: "'Courier New',monospace", color: "#333" } },
+              h("td", { colSpan: 4, style: { background: "#FAFAFA", padding: "10px 14px", fontSize: 12.5, fontFamily: "'Courier New',monospace", color: "#333" } },
                 `Depletion:  ${fmt2(r.lastWk)} (Last Wk)  +  ${fmt2(r.rec)} (Received)  −  ${fmt2(r.current)} (Current)  =  ${Math.round(r.depletion * 100) / 100}`,
                 h("br"),
                 `Variance:   ${fmt2(r.sales)} (Sales)  −  ${Math.round(r.depletion * 100) / 100} (Depletion)  =  ${Math.round(r.variance * 100) / 100}`
@@ -2037,7 +2033,6 @@ function App() {
   const [lastWeek, setLastWeek] = useState({});
   const [session, setSession] = useState([]);
   const [manualCounts, setManualCounts] = useState({});
-  const [countNumber, setCountNumber] = useState(1);
   const [archivedCounts, setArchivedCounts] = useState([]); // from Supabase darien_archives — real persistent history
   const [selectedCount, setSelectedCount] = useState("current"); // "current" or an archive row id
   const [loaded, setLoaded] = useState(false);
@@ -2061,7 +2056,6 @@ function App() {
         if (saved.lastWeek) setLastWeek(saved.lastWeek);
         if (saved.session) setSession(saved.session);
         if (saved.manualCounts) setManualCounts(saved.manualCounts);
-        if (saved.countNumber) setCountNumber(saved.countNumber);
       }
     } catch (e) { console.error("Failed to load saved data:", e); }
     setLoaded(true);
@@ -2071,11 +2065,12 @@ function App() {
   useEffect(() => {
     if (!loaded) return;
     try {
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify({ stock, received, lastWeek, session, manualCounts, countNumber }));
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify({ stock, received, lastWeek, session, manualCounts }));
     } catch (e) { console.error("Failed to save data:", e); }
-  }, [loaded, stock, received, lastWeek, session, manualCounts, countNumber]);
+  }, [loaded, stock, received, lastWeek, session, manualCounts]);
 
   async function closeCount() {
+    const countNumber = archivedCounts.length + 1;
     const dateStart = window.prompt("Date range start for Count " + countNumber + " (e.g. 6/22/26):", "");
     if (dateStart === null) return; // cancelled
     const dateEnd = window.prompt("Date range end for Count " + countNumber + " (e.g. 7/7/26):", "");
@@ -2099,7 +2094,6 @@ function App() {
     setReceived({});
     setSession([]);
     setManualCounts({});
-    setCountNumber(n => n + 1);
     setSelectedCount("current");
     setScreen("home");
   }
@@ -2109,7 +2103,6 @@ function App() {
     setLastWeek({});
     setSession([]);
     setManualCounts({});
-    setCountNumber(1);
     try { window.localStorage.removeItem(STORAGE_KEY); } catch (e) {}
     setScreen("home");
   }
@@ -2120,9 +2113,9 @@ function App() {
     screen === "stock" && h(StockScreen, { master: MASTER_DATA, stock, setStock, onHome: goHome, archivedCounts, selectedCount, setSelectedCount }),
     screen === "received" && h(ReceivedScreen, { master: MASTER_DATA, received, setReceived, onHome: goHome, archivedCounts, selectedCount, setSelectedCount }),
     screen === "speedline" && h(SpeedlineScreen, { master: MASTER_DATA, session, setSession, onHome: goHome }),
-    screen === "speedlineoutput" && h(SpeedlineOutputScreen, { master: MASTER_DATA, session, onHome: goHome }),
-    screen === "manualvsspeedline" && h(ManualVsSpeedlineScreen, { master: MASTER_DATA, manualCounts, setManualCounts, session, onHome: goHome }),
-    screen === "depletion" && h(DepletionScreen, { master: MASTER_DATA, stock, setStock, received, setReceived, lastWeek, setLastWeek, session, countNumber, onCloseCount: closeCount, onHome: goHome, onNavigate: setScreen, archivedCounts, selectedCount, setSelectedCount }),
+    screen === "speedlineoutput" && h(SpeedlineOutputScreen, { master: MASTER_DATA, session, onHome: goHome, archivedCounts, selectedCount, setSelectedCount }),
+    screen === "manualvsspeedline" && h(ManualVsSpeedlineScreen, { master: MASTER_DATA, manualCounts, setManualCounts, session, onHome: goHome, archivedCounts, selectedCount, setSelectedCount }),
+    screen === "depletion" && h(DepletionScreen, { master: MASTER_DATA, stock, setStock, received, setReceived, lastWeek, setLastWeek, session, onCloseCount: closeCount, onHome: goHome, onNavigate: setScreen, archivedCounts, selectedCount, setSelectedCount }),
     screen === "counthistory" && h(CountHistoryScreen, { archivedCounts, onHome: goHome, onRefresh: refreshArchives })
   );
 }

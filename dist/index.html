@@ -991,7 +991,7 @@ function sumStockForProduct(stock, name) {
 
 /* ───────────────────────── NAV ───────────────────────── */
 /* ───────────────────────── HOME (tile menu) ───────────────────────── */
-const APP_VERSION = "v9.2";
+const APP_VERSION = "v9.3";
 
 function Home({ onNavigate, onClearAll }) {
   const tapCountRef = useRef(0);
@@ -1727,7 +1727,7 @@ function ManualVsSpeedlineScreen({ master, manualCounts, setManualCounts, sessio
 }
 
 /* ───────────────────────── DEPLETION REPORT SCREEN ───────────────────────── */
-function DepletionScreen({ master, stock, setStock, received, setReceived, lastWeek, setLastWeek, session, onCloseCount, onHome, onNavigate, archivedCounts, selectedCount, setSelectedCount }) {
+function DepletionScreen({ master, stock, setStock, received, setReceived, lastWeek, setLastWeek, session, onCloseCount, onHome, onNavigate, archivedCounts, selectedCount, setSelectedCount, setManualCounts }) {
   const countNumber = archivedCounts.length + 1;
   const [importMsg, setImportMsg] = useState("");
   const [expandedRow, setExpandedRow] = useState(null);
@@ -1750,13 +1750,14 @@ function DepletionScreen({ master, stock, setStock, received, setReceived, lastW
       const nameIdx = header.indexOf("product name");
       const totalIdx = header.indexOf("total");
       const receivedIdx = header.indexOf("received");
+      const soldIdx = header.indexOf("sold");
       if (nameIdx === -1 || totalIdx === -1 || receivedIdx === -1) {
         setImportMsg("Missing a required column (Product Name / Total / Received).");
         return;
       }
       const masterList = master.map(p => p.name);
       const normIndex = masterList.map(n => ({ name: n, norm: normalizeForMatch(n) }));
-      const newStock = {}, newReceived = {};
+      const newStock = {}, newReceived = {}, newManual = {};
       const unmatched = [];
       let matched = 0;
       for (let i = 1; i < rows.length; i++) {
@@ -1770,11 +1771,13 @@ function DepletionScreen({ master, stock, setStock, received, setReceived, lastW
         const rec = parseFloat(row[receivedIdx]);
         newStock[hit.name] = { front: isNaN(total) ? 0 : total, bar: 0, office: 0, outside: 0 };
         newReceived[hit.name] = isNaN(rec) ? 0 : rec;
+        if (soldIdx !== -1 && typeof row[soldIdx] === "number") newManual[hit.name] = row[soldIdx];
         matched++;
       }
       setStock(newStock);
       setReceived(newReceived);
-      setImportMsg(`Imported ${matched} products.` + (unmatched.length ? ` ${unmatched.length} unmatched: ${unmatched.slice(0, 8).join(", ")}${unmatched.length > 8 ? "…" : ""}` : ""));
+      if (soldIdx !== -1 && setManualCounts) setManualCounts(newManual);
+      setImportMsg(`Imported ${matched} products.` + (soldIdx !== -1 ? " Manual vs Speedline updated too." : "") + (unmatched.length ? ` ${unmatched.length} unmatched: ${unmatched.slice(0, 8).join(", ")}${unmatched.length > 8 ? "…" : ""}` : ""));
     } catch (err) {
       setImportMsg("Couldn't read that file. (" + err.message + ")");
     }
@@ -2115,7 +2118,7 @@ function App() {
     screen === "speedline" && h(SpeedlineScreen, { master: MASTER_DATA, session, setSession, onHome: goHome }),
     screen === "speedlineoutput" && h(SpeedlineOutputScreen, { master: MASTER_DATA, session, onHome: goHome, archivedCounts, selectedCount, setSelectedCount }),
     screen === "manualvsspeedline" && h(ManualVsSpeedlineScreen, { master: MASTER_DATA, manualCounts, setManualCounts, session, onHome: goHome, archivedCounts, selectedCount, setSelectedCount }),
-    screen === "depletion" && h(DepletionScreen, { master: MASTER_DATA, stock, setStock, received, setReceived, lastWeek, setLastWeek, session, onCloseCount: closeCount, onHome: goHome, onNavigate: setScreen, archivedCounts, selectedCount, setSelectedCount }),
+    screen === "depletion" && h(DepletionScreen, { master: MASTER_DATA, stock, setStock, received, setReceived, lastWeek, setLastWeek, session, onCloseCount: closeCount, onHome: goHome, onNavigate: setScreen, archivedCounts, selectedCount, setSelectedCount, setManualCounts }),
     screen === "counthistory" && h(CountHistoryScreen, { archivedCounts, onHome: goHome, onRefresh: refreshArchives })
   );
 }

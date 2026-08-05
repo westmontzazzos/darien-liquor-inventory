@@ -50,6 +50,10 @@ html,body{background:#EFEFEF;color:#111111;font-family:system-ui,-apple-system,'
 .B-red{background:#C8102E;border-color:#C8102E;color:#FFFFFF;}.B-red:hover{background:#A50D25;border-color:#A50D25;}
 .B-green{background:#1B6B3A;border-color:#1B6B3A;color:#FFFFFF;}.B-green:hover{background:#145430;border-color:#145430;}
 .B-outline{background:#FFFFFF;border-color:#E2E2E2;color:#111111;}.B-outline:hover{border-color:#C8102E;color:#C8102E;}
+.CTabs{margin-top:64px;display:flex;gap:8px;flex-wrap:wrap;padding:12px 16px;background:#EFEFEF;border-bottom:1px solid #E2E2E2;}
+.CTab{height:34px;padding:0 16px;border-radius:17px;font-family:'Inter',system-ui,sans-serif;font-size:12px;font-weight:700;cursor:pointer;border:2px solid #E2E2E2;background:#FFFFFF;color:#444444;transition:all 0.14s;-webkit-tap-highlight-color:transparent;}
+.CTab.on{background:#C8102E;border-color:#C8102E;color:#FFFFFF;}
+.CTab:hover:not(.on){border-color:#C8102E;color:#C8102E;}
 .B-ghost{background:transparent;border-color:rgba(255,255,255,0.5);color:#FFFFFF;}.B-ghost:hover{background:rgba(255,255,255,0.15);border-color:#FFFFFF;}
 .B:disabled{opacity:.45;cursor:default;}
 
@@ -124,6 +128,34 @@ const h = React.createElement;
    - No Vodkade or standalone High Noon modifier PLUs were present
      in Darien's dine-in list, so those two maps are empty for now.
    ───────────────────────────────────────────────────────────── */
+
+// ─── SUPABASE (read-only historical counts) ─────────────────────────────────
+const SUPABASE_URL = "https://wkzhmfyfxlfkkqevzxvf.supabase.co";
+const SUPABASE_KEY = "sb_publishable_B1EXocVYT57f5fpvVLONZA_YZx5trib";
+async function sbGet(table, params) {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${params || "select=*"}`, {
+    headers: { "apikey": SUPABASE_KEY, "Authorization": `Bearer ${SUPABASE_KEY}` }
+  });
+  if (!res.ok) throw new Error(`sbGet ${table} failed: ${res.status}`);
+  const data = await res.json();
+  return Array.isArray(data) ? data : [];
+}
+async function sbPost(table, body) {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}`, {
+    method: "POST",
+    headers: { "apikey": SUPABASE_KEY, "Authorization": `Bearer ${SUPABASE_KEY}`, "Content-Type": "application/json", "Prefer": "return=minimal" },
+    body: JSON.stringify(body)
+  });
+  return res.ok;
+}
+async function sbPatch(table, filter, body) {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${filter}`, {
+    method: "PATCH",
+    headers: { "apikey": SUPABASE_KEY, "Authorization": `Bearer ${SUPABASE_KEY}`, "Content-Type": "application/json", "Prefer": "return=minimal" },
+    body: JSON.stringify(body)
+  });
+  return res.ok;
+}
 
 const MASTER_DATA = [
   {"name": "Ambigram", "category": "Beer", "locations": ["Bar"], "vendor": "Sch", "orderUnit": "Keg"},
@@ -959,7 +991,7 @@ function sumStockForProduct(stock, name) {
 
 /* ───────────────────────── NAV ───────────────────────── */
 /* ───────────────────────── HOME (tile menu) ───────────────────────── */
-const APP_VERSION = "v8.1";
+const APP_VERSION = "v9.1";
 
 function Home({ onNavigate, onClearAll }) {
   const tapCountRef = useRef(0);
@@ -1017,6 +1049,24 @@ function ScreenHeader({ onHome, onExportPDF }) {
       onExportPDF && h("button", { className: "B B-ghost", onClick: onExportPDF }, "⬇️ Download PDF"),
       h("button", { className: "B B-ghost", onClick: onHome }, "← Home")
     )
+  );
+}
+
+// Floating pill-tab selector for switching between archived counts and the live
+// in-progress count. Same pattern as Westmont's ATabs — sits directly under the header.
+function CountTabs({ archivedCounts, selectedCount, setSelectedCount }) {
+  return h("div", { className: "CTabs" },
+    [...archivedCounts].reverse().map(c =>
+      h("button", {
+        key: c.id,
+        className: "CTab" + (selectedCount === c.id ? " on" : ""),
+        onClick: () => setSelectedCount(c.id)
+      }, c.week_label)
+    ),
+    h("button", {
+      className: "CTab" + (selectedCount === "current" ? " on" : ""),
+      onClick: () => setSelectedCount("current")
+    }, "Current")
   );
 }
 
@@ -1106,8 +1156,9 @@ function StockPrintSheet({ master, groups }) {
   );
 }
 
-function StockScreen({ master, stock, setStock, onHome }) {
+function StockScreen({ master, stock, setStock, onHome, archivedCounts, selectedCount, setSelectedCount }) {
   const groups = groupMasterByLocation(master);
+  const archived = selectedCount !== "current" ? archivedCounts.find(c => c.id === selectedCount) : null;
   function update(name, loc, val) {
     const num = val === "" ? null : parseFloat(val);
     setStock(prev => ({ ...prev, [name]: { ...(prev[name] || {}), [loc]: num } }));
@@ -1127,38 +1178,49 @@ function StockScreen({ master, stock, setStock, onHome }) {
   }
   return h(React.Fragment, null,
     h(ScreenHeader, { onHome, onExportPDF: exportPDF }),
+    h(CountTabs, { archivedCounts, selectedCount, setSelectedCount }),
     h(StockPrintSheet, { master, groups }),
-    h("main", { className: "Page" },
-      h("div", { className: "Card" },
-        h("div", { className: "Card-title" }, "Current Stock — count by section"),
-        h("div", { className: "empty" }, "One person, one section at a time. A product shows up under every section it's actually stocked in. Use Print for a blank counting sheet.")
-      ),
-      LOCATIONS.map(loc => h("div", { className: "Card", key: loc },
-        h("div", { className: "Card-title" }, loc, h("span", { className: "CatBadge" }, groups[loc].length + " items")),
-        groups[loc].length === 0
-          ? h("div", { className: "empty" }, "No products assigned to this section.")
-          : h("table", null,
-              h("thead", null, h("tr", null, h("th", null, "Product"), h("th", null, "Category"), h("th", { style: { width: 110, textAlign: "right" } }, "Count"))),
+    h("main", { className: "Page", style: { paddingTop: 20 } },
+      archived
+        ? h("div", { className: "Card" },
+            h("div", { className: "Card-title" }, archived.week_label + " — Total"),
+            h("table", null,
+              h("thead", null, h("tr", null, h("th", null, "Product"), h("th", null, "Category"), h("th", { style: { textAlign: "right" } }, "Total"))),
               h("tbody", null,
-                groups[loc].map(p => h("tr", { key: p.name },
-                  h("td", null, p.name),
-                  h("td", null, p.category),
-                  h("td", null, h("input", {
-                    type: "number", step: "any", className: "countinput",
-                    value: (stock[p.name] && stock[p.name][loc.toLowerCase()]) ?? "",
-                    onChange: e => update(p.name, loc.toLowerCase(), e.target.value)
-                  }))
+                master.map(p => h("tr", { key: p.name },
+                  h("td", null, p.name), h("td", null, p.category),
+                  h("td", { className: "qty" }, (archived.sealed_counts || {})[p.name] ? fmt2((archived.sealed_counts || {})[p.name]) : "")
                 ))
               )
             )
-      ))
+          )
+        : LOCATIONS.map(loc => h("div", { className: "Card", key: loc },
+            h("div", { className: "Card-title" }, loc, h("span", { className: "CatBadge" }, groups[loc].length + " items")),
+            groups[loc].length === 0
+              ? null
+              : h("table", null,
+                  h("thead", null, h("tr", null, h("th", null, "Product"), h("th", null, "Category"), h("th", { style: { width: 110, textAlign: "right" } }, "Count"))),
+                  h("tbody", null,
+                    groups[loc].map(p => h("tr", { key: p.name },
+                      h("td", null, p.name),
+                      h("td", null, p.category),
+                      h("td", null, h("input", {
+                        type: "number", step: "any", className: "countinput",
+                        value: (stock[p.name] && stock[p.name][loc.toLowerCase()]) ?? "",
+                        onChange: e => update(p.name, loc.toLowerCase(), e.target.value)
+                      }))
+                    ))
+                  )
+                )
+          ))
     )
   );
 }
 
 /* ───────────────────────── RECEIVED SCREEN ───────────────────────── */
-function ReceivedScreen({ master, received, setReceived, onHome }) {
+function ReceivedScreen({ master, received, setReceived, onHome, archivedCounts, selectedCount, setSelectedCount }) {
   const sorted = [...master].sort((a, b) => orderGuideRank(a.name) - orderGuideRank(b.name));
+  const archived = selectedCount !== "current" ? archivedCounts.find(c => c.id === selectedCount) : null;
   function update(name, val) {
     const num = val === "" ? null : parseFloat(val);
     setReceived(prev => ({ ...prev, [name]: num }));
@@ -1181,11 +1243,8 @@ function ReceivedScreen({ master, received, setReceived, onHome }) {
   }
   return h(React.Fragment, null,
     h(ScreenHeader, { onHome, onExportPDF: exportPDF }),
-    h("main", { className: "Page" },
-      h("div", { className: "Card" },
-        h("div", { className: "Card-title" }, "Received This Week"),
-        h("div", { className: "empty" }, "Enter quantity received per product (same units as stock — bottles, cases-as-counted, or fractional kegs).")
-      ),
+    h(CountTabs, { archivedCounts, selectedCount, setSelectedCount }),
+    h("main", { className: "Page", style: { paddingTop: 20 } },
       h("div", { className: "Card" },
         h("table", null,
           h("thead", null, h("tr", null, h("th", null, "Product"), h("th", null, "Category"), h("th", null, "Vendor"), h("th", { style: { width: 110, textAlign: "right" } }, "Received"))),
@@ -1194,7 +1253,9 @@ function ReceivedScreen({ master, received, setReceived, onHome }) {
               h("td", null, p.name),
               h("td", null, p.category),
               h("td", null, p.vendor || ""),
-              h("td", null, h("input", {
+              archived
+                ? h("td", { className: "qty" }, ((archived.orders || {}).received || {})[p.name] ? fmt2(((archived.orders || {}).received || {})[p.name]) : "")
+                : h("td", null, h("input", {
                 type: "number", step: "any", className: "countinput",
                 value: received[p.name] ?? "",
                 onChange: e => update(p.name, e.target.value)
@@ -1664,17 +1725,15 @@ function ManualVsSpeedlineScreen({ master, manualCounts, setManualCounts, sessio
 }
 
 /* ───────────────────────── DEPLETION REPORT SCREEN ───────────────────────── */
-function DepletionScreen({ master, stock, setStock, received, setReceived, lastWeek, setLastWeek, session, countNumber, onCloseCount, onHome, onNavigate }) {
+function DepletionScreen({ master, stock, setStock, received, setReceived, lastWeek, setLastWeek, session, countNumber, onCloseCount, onHome, onNavigate, archivedCounts, selectedCount, setSelectedCount }) {
   const [importMsg, setImportMsg] = useState("");
   const [expandedRow, setExpandedRow] = useState(null);
   const importRef = useRef(null);
   const salesTotals = combineSalesSession(session);
   const masterNames = new Set(master.map(p => p.name));
   const sorted = [...master].sort((a, b) => orderGuideRank(a.name) - orderGuideRank(b.name));
+  const archived = selectedCount !== "current" ? archivedCounts.find(c => c.id === selectedCount) : null;
 
-  // Imports Total/Last Week/Received directly from Stephanie's Order Guide spreadsheet.
-  // Sold is deliberately NOT read from this file — Sold only ever comes from the
-  // Speedline parser session, never from this import.
   async function handleOrderGuideImport(e) {
     const file = e.target.files[0];
     if (!file) return;
@@ -1687,15 +1746,14 @@ function DepletionScreen({ master, stock, setStock, received, setReceived, lastW
       const header = (rows[0] || []).map(h => (h || "").toString().trim().toLowerCase());
       const nameIdx = header.indexOf("product name");
       const totalIdx = header.indexOf("total");
-      const lastWeekIdx = header.indexOf("last week");
       const receivedIdx = header.indexOf("received");
-      if (nameIdx === -1 || totalIdx === -1 || lastWeekIdx === -1 || receivedIdx === -1) {
-        setImportMsg("That Order Guide tab is missing one of: Product Name, Total, Last Week, Received columns.");
+      if (nameIdx === -1 || totalIdx === -1 || receivedIdx === -1) {
+        setImportMsg("Missing a required column (Product Name / Total / Received).");
         return;
       }
       const masterList = master.map(p => p.name);
       const normIndex = masterList.map(n => ({ name: n, norm: normalizeForMatch(n) }));
-      const newStock = {}, newLastWeek = {}, newReceived = {};
+      const newStock = {}, newReceived = {};
       const unmatched = [];
       let matched = 0;
       for (let i = 1; i < rows.length; i++) {
@@ -1706,27 +1764,21 @@ function DepletionScreen({ master, stock, setStock, received, setReceived, lastW
         const hit = normIndex.find(m => m.norm === rowNorm);
         if (!hit) { unmatched.push(rawName); continue; }
         const total = parseFloat(row[totalIdx]);
-        const lw = parseFloat(row[lastWeekIdx]);
         const rec = parseFloat(row[receivedIdx]);
         newStock[hit.name] = { front: isNaN(total) ? 0 : total, bar: 0, office: 0, outside: 0 };
-        newLastWeek[hit.name] = isNaN(lw) ? 0 : lw;
         newReceived[hit.name] = isNaN(rec) ? 0 : rec;
         matched++;
       }
       setStock(newStock);
-      setLastWeek(newLastWeek);
       setReceived(newReceived);
-      setImportMsg(
-        `Imported ${matched} products (Total, Last Week, Received) from "${sheetName}".` +
-        (unmatched.length ? ` ${unmatched.length} row(s) had no matching Master product and were skipped: ${unmatched.slice(0, 8).join(", ")}${unmatched.length > 8 ? "…" : ""}` : "")
-      );
+      setImportMsg(`Imported ${matched} products.` + (unmatched.length ? ` ${unmatched.length} unmatched: ${unmatched.slice(0, 8).join(", ")}${unmatched.length > 8 ? "…" : ""}` : ""));
     } catch (err) {
-      setImportMsg("Couldn't read that file — make sure it's the Order Guide .xlsx. (" + err.message + ")");
+      setImportMsg("Couldn't read that file. (" + err.message + ")");
     }
     if (importRef.current) importRef.current.value = "";
   }
 
-  const rows = sorted.map(p => {
+  const liveRows = sorted.map(p => {
     const current = sumStockForProduct(stock, p.name);
     const lastWk = lastWeek[p.name] || 0;
     const rec = received[p.name] || 0;
@@ -1735,15 +1787,26 @@ function DepletionScreen({ master, stock, setStock, received, setReceived, lastW
     const variance = sales - depletion;
     return { name: p.name, category: p.category, lastWk, rec, current, depletion, sales, variance };
   });
+  const archivedRows = archived ? sorted.map(p => {
+    const current = (archived.sealed_counts || {})[p.name] || 0;
+    const lastWk = ((archived.orders || {}).last_week || {})[p.name] || 0;
+    const rec = ((archived.orders || {}).received || {})[p.name] || 0;
+    const sales = (archived.pos_sales || {})[p.name] || 0;
+    const depletion = lastWk + rec - current;
+    const variance = sales - depletion;
+    return { name: p.name, category: p.category, lastWk, rec, current, depletion, sales, variance };
+  }) : null;
+  const rows = archived ? archivedRows : liveRows;
 
-  const unrecognized = Object.entries(salesTotals).filter(([name]) => !masterNames.has(name));
+  const unrecognized = archived ? [] : Object.entries(salesTotals).filter(([name]) => !masterNames.has(name));
 
   function exportShowMathPDF() {
+    const label = archived ? archived.week_label : "Count " + countNumber;
     downloadPDF({
-      filename: `Darien-Count-${countNumber}-Show-Math.pdf`,
+      filename: `Darien-${label.replace(/\s+/g, "-")}-Show-Math.pdf`,
       title: "DARIEN LIQUOR INVENTORY",
       sections: [{
-        heading: `Count ${countNumber} (Live) — Show Math`,
+        heading: `${label} — Show Math`,
         columns: [
           { key: "name", header: "Product", width: 150 },
           { key: "lastWk", header: "Last Wk", width: 55, align: "right" },
@@ -1766,31 +1829,21 @@ function DepletionScreen({ master, stock, setStock, received, setReceived, lastW
 
   return h(React.Fragment, null,
     h(ScreenHeader, { onHome }),
-    h("main", { className: "Page" },
-    h("div", { className: "Card", style: { background: "#EFF8F1", border: "1px solid #1B6B3A" } },
-      h("div", { style: { fontSize: 12, fontWeight: 700, color: "#1B6B3A" } }, "🟢 LIVE — Count " + countNumber + " (in progress, not yet closed)"),
-      h("div", { className: "btnrow", style: { marginTop: 8 } },
-        h("button", { className: "B B-ghost", onClick: () => onNavigate("counthistory") }, "📚 View Count History")
-      )
+    h(CountTabs, { archivedCounts, selectedCount, setSelectedCount }),
+    h("main", { className: "Page", style: { paddingTop: 20 } },
+    archived
+      ? h("div", { style: { padding: "6px 16px", fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", textAlign: "center", background: "#E8F5E9", color: "#1b6b3a", margin: "-16px -16px 16px" } },
+          "🔒 ARCHIVED — READ ONLY")
+      : h("div", { style: { padding: "6px 16px", fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", textAlign: "center", background: "#FFF3E0", color: "#8a5a00", margin: "-16px -16px 16px" } },
+          "⚠ LIVE — STILL IN PROGRESS, NOT YET CLOSED"),
+    h("div", { className: "btnrow", style: { padding: "0 0 12px" } },
+      h("button", { className: "B B-outline", onClick: () => onNavigate("counthistory") }, "📚 Count History"),
+      h("button", { className: "B B-outline", onClick: exportShowMathPDF }, "⬇️ Show Math (PDF)"),
+      !archived && h("input", { type: "file", accept: ".xlsx", ref: importRef, onChange: handleOrderGuideImport, style: { display: "none" } }),
+      !archived && h("button", { className: "B B-red", onClick: () => importRef.current && importRef.current.click() }, "📥 Upload Order Guide"),
+      !archived && h("button", { className: "B B-green", onClick: onCloseCount }, "Close Count " + countNumber)
     ),
-    h("div", { className: "Card" },
-      h("div", { className: "Card-title" }, "Import from Order Guide"),
-      h("div", { className: "empty" }, "Upload Stephanie's spreadsheet — pulls Total, Last Week, and Received straight from the Order Guide tab. Sold always comes from the Speedline parser only, never from this file. Replaces all current Total/Last Week/Received values with what's in the file."),
-      h("div", { className: "btnrow" },
-        h("input", { type: "file", accept: ".xlsx", ref: importRef, onChange: handleOrderGuideImport, style: { display: "none" } }),
-        h("button", { className: "B B-red", onClick: () => importRef.current && importRef.current.click() }, "📥 Upload Order Guide Spreadsheet")
-      ),
-      importMsg && h("div", { className: "empty", style: { marginTop: 8 } }, importMsg)
-    ),
-    h("div", { className: "Card" },
-      h("div", { className: "Card-title" }, "Depletion Report"),
-      h("div", { className: "empty" },
-        "Depletion = Last Week + Received − Current Count. Variance = Sales − Depletion. Negative = short, positive = surplus, zero = even. Tap any row to see the full math."
-      ),
-      h("div", { className: "btnrow", style: { marginTop: 8 } },
-        h("button", { className: "B B-ghost", onClick: exportShowMathPDF }, "⬇️ Show Math (PDF)")
-      )
-    ),
+    importMsg && h("div", { className: "empty" }, importMsg),
     h("div", { className: "Card" },
       h("table", null,
         h("thead", null, h("tr", null,
@@ -1829,29 +1882,39 @@ function DepletionScreen({ master, stock, setStock, received, setReceived, lastW
     unrecognized.length > 0 && h("div", { className: "Card" },
       h("div", { className: "Card-title" }, "Unrecognized Sales Items (" + unrecognized.length + ")"),
       h("div", { className: "flags" },
-        h("h3", null, "Sales recorded under a name that doesn't match any Master Guide product"),
         unrecognized.map(([name, qty]) => h("div", { key: name, className: "flagline" }, `${name} — qty ${Math.round(qty * 100) / 100}`))
       )
-    ),
-    h("div", { className: "Card" },
-      h("div", { className: "Card-title" }, "Close Count " + countNumber),
-      h("div", { className: "empty" }, "Archives this count permanently to Count History with its date range, then starts Count " + (countNumber + 1) + " fresh. This does persist now — refreshing the page will not lose it."),
-      h("div", { className: "btnrow" }, h("button", { className: "B B-green", onClick: onCloseCount }, "Close Count " + countNumber + " & Start Count " + (countNumber + 1)))
     )
   ));
 }
 
 /* ───────────────────────── COUNT HISTORY ───────────────────────── */
-function CountHistoryScreen({ counts, onHome }) {
-  const [openCount, setOpenCount] = useState(null); // countNumber currently expanded
-  const sortedCounts = [...counts].sort((a, b) => b.countNumber - a.countNumber);
+function CountHistoryScreen({ archivedCounts, onHome, onRefresh }) {
+  const [openId, setOpenId] = useState(null);
+  const [editId, setEditId] = useState(null);
+  const [editRows, setEditRows] = useState({});
+  const [saving, setSaving] = useState(false);
+  const sorted = [...archivedCounts].reverse();
+
+  function buildRows(c) {
+    return MASTER_DATA.map(p => {
+      const current = (c.sealed_counts || {})[p.name] || 0;
+      const lastWk = ((c.orders || {}).last_week || {})[p.name] || 0;
+      const rec = ((c.orders || {}).received || {})[p.name] || 0;
+      const sales = (c.pos_sales || {})[p.name] || 0;
+      const depletion = lastWk + rec - current;
+      const variance = sales - depletion;
+      return { name: p.name, category: p.category, lastWk, rec, current, depletion, sales, variance };
+    });
+  }
 
   function exportCountPDF(c) {
+    const rows = buildRows(c);
     downloadPDF({
-      filename: `Darien-Count-${c.countNumber}-Show-Math.pdf`,
+      filename: `Darien-${c.week_label.replace(/\s+/g, "-")}-Show-Math.pdf`,
       title: "DARIEN LIQUOR INVENTORY",
       sections: [{
-        heading: `Count ${c.countNumber} (Archived) — ${c.dateStart} to ${c.dateEnd} — Show Math`,
+        heading: `${c.week_label} (Archived) — ${c.archive_date} — Show Math`,
         columns: [
           { key: "name", header: "Product", width: 150 },
           { key: "lastWk", header: "Last Wk", width: 55, align: "right" },
@@ -1861,7 +1924,7 @@ function CountHistoryScreen({ counts, onHome }) {
           { key: "sales", header: "Sales", width: 55, align: "right" },
           { key: "variance", header: "= Variance", width: 60, align: "right" },
         ],
-        rows: c.rows.map(r => ({
+        rows: rows.map(r => ({
           name: r.name,
           lastWk: fmt2(r.lastWk), rec: fmt2(r.rec), current: fmt2(r.current),
           depletion: fmt2(Math.round(r.depletion * 100) / 100),
@@ -1872,54 +1935,94 @@ function CountHistoryScreen({ counts, onHome }) {
     });
   }
 
+  function startEdit(c) {
+    const rows = buildRows(c);
+    const draft = {};
+    for (const r of rows) draft[r.name] = { current: r.current, lastWk: r.lastWk, rec: r.rec, sales: r.sales };
+    setEditRows(draft);
+    setEditId(c.id);
+  }
+
+  async function saveEdit(c) {
+    setSaving(true);
+    const sealed_counts = {}, last_week = {}, received = {}, pos_sales = {};
+    for (const p of MASTER_DATA) {
+      const d = editRows[p.name] || {};
+      sealed_counts[p.name] = d.current || 0;
+      last_week[p.name] = d.lastWk || 0;
+      received[p.name] = d.rec || 0;
+      pos_sales[p.name] = d.sales || 0;
+    }
+    const ok = await sbPatch("darien_archives", `id=eq.${c.id}`, {
+      sealed_counts, orders: { last_week, received }, pos_sales,
+    });
+    setSaving(false);
+    if (!ok) { alert("Couldn't save changes — try again."); return; }
+    setEditId(null);
+    if (onRefresh) await onRefresh();
+  }
+
   return h(React.Fragment, null,
     h(ScreenHeader, { onHome }),
     h("main", { className: "Page" },
-      h("div", { className: "Card" },
-        h("div", { className: "Card-title" }, "Count History"),
-        h("div", { className: "empty" }, counts.length === 0
-          ? "No counts closed out yet. Once you close a count from the Depletion screen, it'll show up here permanently — tap any count below to see its date range and full breakdown."
-          : "Tap a count to see its date range and full breakdown.")
+      sorted.length === 0 && h("div", { className: "Card" },
+        h("div", { className: "empty" }, "No counts closed out yet.")
       ),
-      sortedCounts.map(c => h("div", { key: c.countNumber, className: "Card" },
-        h("div", {
-          className: "Card-title", style: { cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center" },
-          onClick: () => setOpenCount(openCount === c.countNumber ? null : c.countNumber)
-        },
-          h("span", null, "Count " + c.countNumber),
-          h("span", { style: { fontSize: 12, fontWeight: 400, color: "#666" } }, openCount === c.countNumber ? (c.dateStart + " – " + c.dateEnd) : "tap to expand")
-        ),
-        openCount === c.countNumber && h(React.Fragment, null,
-          h("div", { className: "empty" }, "Closed: " + c.closedAt),
-          h("div", { className: "btnrow" },
-            h("button", { className: "B B-ghost", onClick: () => exportCountPDF(c) }, "⬇️ Show Math (PDF)")
+      sorted.map(c => {
+        const rows = buildRows(c);
+        const isOpen = openId === c.id;
+        const isEditing = editId === c.id;
+        return h("div", { key: c.id, className: "Card" },
+          h("div", {
+            className: "Card-title", style: { cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center" },
+            onClick: () => setOpenId(isOpen ? null : c.id)
+          },
+            h("span", null, c.week_label),
+            h("span", { style: { fontSize: 12, fontWeight: 400, color: "#666" } }, isOpen ? c.archive_date : "tap to expand")
           ),
-          h("table", { style: { marginTop: 10 } },
-            h("thead", null, h("tr", null,
-              h("th", null, "Product"), h("th", null, "Cat"),
-              h("th", { style: { textAlign: "right" } }, "Last Wk"),
-              h("th", { style: { textAlign: "right" } }, "Received"),
-              h("th", { style: { textAlign: "right" } }, "Current"),
-              h("th", { style: { textAlign: "right" } }, "Depletion"),
-              h("th", { style: { textAlign: "right" } }, "Sales"),
-              h("th", { style: { textAlign: "right" } }, "Variance")
-            )),
-            h("tbody", null,
-              c.rows.map(r => h("tr", { key: r.name },
-                h("td", null, r.name),
-                h("td", null, r.category),
-                h("td", { className: "qty" }, r.lastWk ? fmt2(r.lastWk) : ""),
-                h("td", { className: "qty" }, r.rec ? fmt2(r.rec) : ""),
-                h("td", { className: "qty" }, r.current ? fmt2(r.current) : ""),
-                h("td", { className: "qty" }, Math.round(r.depletion * 100) / 100),
-                h("td", { className: "qty" }, Math.round(r.sales * 100) / 100),
-                h("td", { className: "qty", style: { color: r.variance < -0.01 ? "#C8102E" : r.variance > 0.01 ? "#B36A00" : "#1B6B3A", fontWeight: 600 } },
-                  Math.round(r.variance * 100) / 100)
-              ))
+          isOpen && h(React.Fragment, null,
+            h("div", { className: "btnrow" },
+              h("button", { className: "B B-outline", onClick: () => exportCountPDF(c) }, "⬇️ Show Math (PDF)"),
+              !isEditing && h("button", { className: "B B-outline", onClick: () => startEdit(c) }, "✏️ Edit Count"),
+              isEditing && h("button", { className: "B B-green", onClick: () => saveEdit(c), disabled: saving }, saving ? "Saving…" : "💾 Save"),
+              isEditing && h("button", { className: "B B-outline", onClick: () => setEditId(null) }, "Cancel")
+            ),
+            h("table", { style: { marginTop: 10 } },
+              h("thead", null, h("tr", null,
+                h("th", null, "Product"), h("th", null, "Cat"),
+                h("th", { style: { textAlign: "right" } }, "Last Wk"),
+                h("th", { style: { textAlign: "right" } }, "Received"),
+                h("th", { style: { textAlign: "right" } }, "Current"),
+                h("th", { style: { textAlign: "right" } }, "Depletion"),
+                h("th", { style: { textAlign: "right" } }, "Sales"),
+                h("th", { style: { textAlign: "right" } }, "Variance")
+              )),
+              h("tbody", null,
+                rows.map(r => isEditing ? h("tr", { key: r.name },
+                  h("td", null, r.name),
+                  h("td", null, r.category),
+                  h("td", null, h("input", { type: "number", value: editRows[r.name]?.lastWk ?? "", onChange: e => setEditRows(prev => ({ ...prev, [r.name]: { ...prev[r.name], lastWk: parseFloat(e.target.value) || 0 } })) })),
+                  h("td", null, h("input", { type: "number", value: editRows[r.name]?.rec ?? "", onChange: e => setEditRows(prev => ({ ...prev, [r.name]: { ...prev[r.name], rec: parseFloat(e.target.value) || 0 } })) })),
+                  h("td", null, h("input", { type: "number", value: editRows[r.name]?.current ?? "", onChange: e => setEditRows(prev => ({ ...prev, [r.name]: { ...prev[r.name], current: parseFloat(e.target.value) || 0 } })) })),
+                  h("td", { className: "qty" }, "—"),
+                  h("td", null, h("input", { type: "number", value: editRows[r.name]?.sales ?? "", onChange: e => setEditRows(prev => ({ ...prev, [r.name]: { ...prev[r.name], sales: parseFloat(e.target.value) || 0 } })) })),
+                  h("td", { className: "qty" }, "—")
+                ) : h("tr", { key: r.name },
+                  h("td", null, r.name),
+                  h("td", null, r.category),
+                  h("td", { className: "qty" }, r.lastWk ? fmt2(r.lastWk) : ""),
+                  h("td", { className: "qty" }, r.rec ? fmt2(r.rec) : ""),
+                  h("td", { className: "qty" }, r.current ? fmt2(r.current) : ""),
+                  h("td", { className: "qty" }, Math.round(r.depletion * 100) / 100),
+                  h("td", { className: "qty" }, Math.round(r.sales * 100) / 100),
+                  h("td", { className: "qty", style: { color: r.variance < -0.01 ? "#C8102E" : r.variance > 0.01 ? "#B36A00" : "#1B6B3A", fontWeight: 600 } },
+                    Math.round(r.variance * 100) / 100)
+                ))
+              )
             )
           )
-        )
-      ))
+        );
+      })
     )
   );
 }
@@ -1935,8 +2038,17 @@ function App() {
   const [session, setSession] = useState([]);
   const [manualCounts, setManualCounts] = useState({});
   const [countNumber, setCountNumber] = useState(1);
-  const [counts, setCounts] = useState([]); // archived counts — real persistent history
+  const [archivedCounts, setArchivedCounts] = useState([]); // from Supabase darien_archives — real persistent history
+  const [selectedCount, setSelectedCount] = useState("current"); // "current" or an archive row id
   const [loaded, setLoaded] = useState(false);
+
+  async function refreshArchives() {
+    try {
+      const rows = await sbGet("darien_archives", "select=*&order=created_at.asc");
+      setArchivedCounts(rows);
+    } catch (e) { console.error("Failed to load archived counts:", e); }
+  }
+  useEffect(() => { refreshArchives(); }, []);
 
   // Load saved state once on mount (device-local only — see note in chat).
   useEffect(() => {
@@ -1950,7 +2062,6 @@ function App() {
         if (saved.session) setSession(saved.session);
         if (saved.manualCounts) setManualCounts(saved.manualCounts);
         if (saved.countNumber) setCountNumber(saved.countNumber);
-        if (saved.counts) setCounts(saved.counts);
       }
     } catch (e) { console.error("Failed to load saved data:", e); }
     setLoaded(true);
@@ -1960,35 +2071,27 @@ function App() {
   useEffect(() => {
     if (!loaded) return;
     try {
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify({ stock, received, lastWeek, session, manualCounts, countNumber, counts }));
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify({ stock, received, lastWeek, session, manualCounts, countNumber }));
     } catch (e) { console.error("Failed to save data:", e); }
-  }, [loaded, stock, received, lastWeek, session, manualCounts, countNumber, counts]);
+  }, [loaded, stock, received, lastWeek, session, manualCounts, countNumber]);
 
-  function buildDepletionRows() {
-    const salesTotals = combineSalesSession(session);
-    return MASTER_DATA.map(p => {
-      const current = sumStockForProduct(stock, p.name);
-      const lastWk = lastWeek[p.name] || 0;
-      const rec = received[p.name] || 0;
-      const sales = salesTotals[p.name] || 0;
-      const depletion = lastWk + rec - current;
-      const variance = sales - depletion;
-      return { name: p.name, category: p.category, lastWk, rec, current, depletion, sales, variance };
-    });
-  }
-
-  function closeCount() {
+  async function closeCount() {
     const dateStart = window.prompt("Date range start for Count " + countNumber + " (e.g. 6/22/26):", "");
     if (dateStart === null) return; // cancelled
     const dateEnd = window.prompt("Date range end for Count " + countNumber + " (e.g. 7/7/26):", "");
     if (dateEnd === null) return; // cancelled
-    const rows = buildDepletionRows();
-    const archived = {
-      countNumber, dateStart, dateEnd,
-      closedAt: new Date().toLocaleString(),
-      stock, received, lastWeek, session, rows,
-    };
-    setCounts(prev => [...prev, archived]);
+    const sealed_counts = {};
+    for (const p of MASTER_DATA) sealed_counts[p.name] = sumStockForProduct(stock, p.name);
+    const pos_sales = combineSalesSession(session);
+    const ok = await sbPost("darien_archives", {
+      week_label: "Count " + countNumber,
+      archive_date: dateStart + " to " + dateEnd,
+      sealed_counts, open_counts: null,
+      orders: { last_week: lastWeek, received },
+      pos_sales,
+    });
+    if (!ok) { alert("Couldn't save Count " + countNumber + " to the database — nothing was cleared. Try again."); return; }
+    await refreshArchives();
     const newLastWeek = {};
     for (const p of MASTER_DATA) newLastWeek[p.name] = sumStockForProduct(stock, p.name);
     setLastWeek(newLastWeek);
@@ -1997,6 +2100,7 @@ function App() {
     setSession([]);
     setManualCounts({});
     setCountNumber(n => n + 1);
+    setSelectedCount("current");
     setScreen("home");
   }
   function clearAll() {
@@ -2006,7 +2110,6 @@ function App() {
     setSession([]);
     setManualCounts({});
     setCountNumber(1);
-    setCounts([]);
     try { window.localStorage.removeItem(STORAGE_KEY); } catch (e) {}
     setScreen("home");
   }
@@ -2014,13 +2117,13 @@ function App() {
 
   return h(React.Fragment, null,
     screen === "home" && h(Home, { onNavigate: setScreen, onClearAll: clearAll }),
-    screen === "stock" && h(StockScreen, { master: MASTER_DATA, stock, setStock, onHome: goHome }),
-    screen === "received" && h(ReceivedScreen, { master: MASTER_DATA, received, setReceived, onHome: goHome }),
+    screen === "stock" && h(StockScreen, { master: MASTER_DATA, stock, setStock, onHome: goHome, archivedCounts, selectedCount, setSelectedCount }),
+    screen === "received" && h(ReceivedScreen, { master: MASTER_DATA, received, setReceived, onHome: goHome, archivedCounts, selectedCount, setSelectedCount }),
     screen === "speedline" && h(SpeedlineScreen, { master: MASTER_DATA, session, setSession, onHome: goHome }),
     screen === "speedlineoutput" && h(SpeedlineOutputScreen, { master: MASTER_DATA, session, onHome: goHome }),
     screen === "manualvsspeedline" && h(ManualVsSpeedlineScreen, { master: MASTER_DATA, manualCounts, setManualCounts, session, onHome: goHome }),
-    screen === "depletion" && h(DepletionScreen, { master: MASTER_DATA, stock, setStock, received, setReceived, lastWeek, setLastWeek, session, countNumber, onCloseCount: closeCount, onHome: goHome, onNavigate: setScreen }),
-    screen === "counthistory" && h(CountHistoryScreen, { counts, onHome: goHome })
+    screen === "depletion" && h(DepletionScreen, { master: MASTER_DATA, stock, setStock, received, setReceived, lastWeek, setLastWeek, session, countNumber, onCloseCount: closeCount, onHome: goHome, onNavigate: setScreen, archivedCounts, selectedCount, setSelectedCount }),
+    screen === "counthistory" && h(CountHistoryScreen, { archivedCounts, onHome: goHome, onRefresh: refreshArchives })
   );
 }
 

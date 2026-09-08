@@ -923,7 +923,7 @@ function processSpecialty(text) {
     return { bottles, flags };
 }
 
-const WINE_SUPPRESS = new Set(["2876"]); // Red Sangria — specialty cocktail, not a straight wine pour
+const WINE_SUPPRESS = new Set(["2874", "2876", "2877"]); // Aperol Spritz, Red Sangria, White Sangria — specialty cocktails, not straight wine pours
 // LaMarca Split is a single-serve mini-bottle (187ml), rung up at the register as a
 // "Glass" for convenience - but it is NOT a glass poured from a larger bottle, so running
 // it through the standard glass-to-bottle ratio (WINE_GLASSES_PER_BOTTLE, built for a
@@ -1047,7 +1047,7 @@ function sumStockForProduct(stock, name) {
 
 /* ───────────────────────── NAV ───────────────────────── */
 /* ───────────────────────── HOME (tile menu) ───────────────────────── */
-const APP_VERSION = "v9.8";
+const APP_VERSION = "v9.9";
 
 function Home({ onNavigate, onClearAll }) {
   const tapCountRef = useRef(0);
@@ -1973,14 +1973,15 @@ function CountHistoryScreen({ archivedCounts, onHome, onRefresh }) {
   const sorted = [...archivedCounts].reverse();
 
   function buildRows(c) {
-    return MASTER_DATA.map(p => {
+    return sortForDepletion(MASTER_DATA).map(p => {
       const current = (c.sealed_counts || {})[p.name] || 0;
       const lastWk = ((c.orders || {}).last_week || {})[p.name] || 0;
       const rec = ((c.orders || {}).received || {})[p.name] || 0;
       const sales = (c.pos_sales || {})[p.name] || 0;
       const depletion = lastWk + rec - current;
       const variance = sales - depletion;
-      return { name: p.name, category: p.category, lastWk, rec, current, depletion, sales, variance };
+      const grp = depletionGroup(p);
+      return { name: p.name, category: p.category, lastWk, rec, current, depletion, sales, variance, top: grp.top, sub: grp.sub };
     });
   }
 
@@ -2074,26 +2075,41 @@ function CountHistoryScreen({ archivedCounts, onHome, onRefresh }) {
                 h("th", { style: { textAlign: "right" } }, "Variance")
               )),
               h("tbody", null,
-                rows.map(r => isEditing ? h("tr", { key: r.name },
-                  h("td", null, r.name),
-                  h("td", null, r.category),
-                  h("td", null, h("input", { type: "number", value: editRows[r.name]?.lastWk ?? "", onChange: e => setEditRows(prev => ({ ...prev, [r.name]: { ...prev[r.name], lastWk: parseFloat(e.target.value) || 0 } })) })),
-                  h("td", null, h("input", { type: "number", value: editRows[r.name]?.rec ?? "", onChange: e => setEditRows(prev => ({ ...prev, [r.name]: { ...prev[r.name], rec: parseFloat(e.target.value) || 0 } })) })),
-                  h("td", null, h("input", { type: "number", value: editRows[r.name]?.current ?? "", onChange: e => setEditRows(prev => ({ ...prev, [r.name]: { ...prev[r.name], current: parseFloat(e.target.value) || 0 } })) })),
-                  h("td", { className: "qty" }, "—"),
-                  h("td", null, h("input", { type: "number", value: editRows[r.name]?.sales ?? "", onChange: e => setEditRows(prev => ({ ...prev, [r.name]: { ...prev[r.name], sales: parseFloat(e.target.value) || 0 } })) })),
-                  h("td", { className: "qty" }, "—")
-                ) : h("tr", { key: r.name },
-                  h("td", null, r.name),
-                  h("td", null, r.category),
-                  h("td", { className: "qty" }, r.lastWk ? fmt2(r.lastWk) : ""),
-                  h("td", { className: "qty" }, r.rec ? fmt2(r.rec) : ""),
-                  h("td", { className: "qty" }, r.current ? fmt2(r.current) : ""),
-                  h("td", { className: "qty" }, Math.round(r.depletion * 100) / 100),
-                  h("td", { className: "qty" }, Math.round(r.sales * 100) / 100),
-                  h("td", { className: "qty", style: { color: r.variance < -0.01 ? "#C8102E" : r.variance > 0.01 ? "#B36A00" : "#1B6B3A", fontWeight: 600 } },
-                    Math.round(r.variance * 100) / 100)
-                ))
+                isEditing
+                  ? rows.map(r => h("tr", { key: r.name },
+                      h("td", null, r.name),
+                      h("td", null, r.category),
+                      h("td", null, h("input", { type: "number", value: editRows[r.name]?.lastWk ?? "", onChange: e => setEditRows(prev => ({ ...prev, [r.name]: { ...prev[r.name], lastWk: parseFloat(e.target.value) || 0 } })) })),
+                      h("td", null, h("input", { type: "number", value: editRows[r.name]?.rec ?? "", onChange: e => setEditRows(prev => ({ ...prev, [r.name]: { ...prev[r.name], rec: parseFloat(e.target.value) || 0 } })) })),
+                      h("td", null, h("input", { type: "number", value: editRows[r.name]?.current ?? "", onChange: e => setEditRows(prev => ({ ...prev, [r.name]: { ...prev[r.name], current: parseFloat(e.target.value) || 0 } })) })),
+                      h("td", { className: "qty" }, "—"),
+                      h("td", null, h("input", { type: "number", value: editRows[r.name]?.sales ?? "", onChange: e => setEditRows(prev => ({ ...prev, [r.name]: { ...prev[r.name], sales: parseFloat(e.target.value) || 0 } })) })),
+                      h("td", { className: "qty" }, "—")
+                    ))
+                  : rows.flatMap((r, i) => {
+                      const prev = rows[i - 1];
+                      const showTop = !prev || prev.top !== r.top;
+                      const showSub = showTop || prev.sub !== r.sub;
+                      const out = [];
+                      if (showTop) out.push(h("tr", { key: r.top + "-header" },
+                        h("td", { colSpan: 8, style: { background: "#C8102E", color: "#FFFFFF", fontWeight: 700, fontSize: 13, padding: "8px 12px" } }, r.top)
+                      ));
+                      if (showSub) out.push(h("tr", { key: r.top + "-" + r.sub + "-header" },
+                        h("td", { colSpan: 8, style: { background: "#F0F0F0", color: "#333", fontWeight: 700, fontSize: 11.5, textTransform: "uppercase", letterSpacing: "0.04em", padding: "6px 12px" } }, r.sub)
+                      ));
+                      out.push(h("tr", { key: r.name },
+                        h("td", null, r.name),
+                        h("td", null, r.category),
+                        h("td", { className: "qty" }, r.lastWk ? fmt2(r.lastWk) : ""),
+                        h("td", { className: "qty" }, r.rec ? fmt2(r.rec) : ""),
+                        h("td", { className: "qty" }, r.current ? fmt2(r.current) : ""),
+                        h("td", { className: "qty" }, Math.round(r.depletion * 100) / 100),
+                        h("td", { className: "qty" }, Math.round(r.sales * 100) / 100),
+                        h("td", { className: "qty", style: { color: r.variance < -0.01 ? "#C8102E" : r.variance > 0.01 ? "#B36A00" : "#1B6B3A", fontWeight: 600 } },
+                          Math.round(r.variance * 100) / 100)
+                      ));
+                      return out;
+                    })
               )
             )
           )

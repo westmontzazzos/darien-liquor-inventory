@@ -1047,7 +1047,7 @@ function sumStockForProduct(stock, name) {
 
 /* ───────────────────────── NAV ───────────────────────── */
 /* ───────────────────────── HOME (tile menu) ───────────────────────── */
-const APP_VERSION = "v10.2";
+const APP_VERSION = "v10.3";
 
 function Home({ onNavigate, onClearAll }) {
   const tapCountRef = useRef(0);
@@ -1712,7 +1712,7 @@ function ManualVsSpeedlineScreen({ master, manualCounts, setManualCounts, sessio
   }
 
   const rows = sorted.map(p => {
-    const manual = archived ? null : (manualCounts[p.name] ?? null);
+    const manual = archived ? ((archived.open_counts || {})[p.name] ?? null) : (manualCounts[p.name] ?? null);
     const parser = archived ? ((archived.pos_sales || {})[p.name] || 0) : (salesTotals[p.name] || 0);
     const diff = manual === null ? null : Math.round((parser - manual) * 100) / 100;
     return { name: p.name, category: p.category, manual, parser, diff };

@@ -626,6 +626,49 @@ const WINE_GLASSES_PER_BOTTLE = 4.17;
 const LOCATIONS = ["Front", "Bar", "Office", "Outside"];
 const ORDER_GUIDE_SEQUENCE = ["Ambigram", "Blue Moon Draft", "Bud Light", "Budweiser", "Ciderboys", "Coors Light Btl", "Corona", "Corona Light", "Daura", "Dos Equis", "Shiner", "Guinness", "Heineken", "High Life", "Stone Buenaveza", "Labatt", "LongSnapper", "Michelob Ultra", "Miller Lite", "Miller Lite Draft", "Modelo", "Moretti", "Old Style", "Spatan", "Stella Artois", "Stella Liberte N.A.", "Stone IPA", "Yuengling", "Yuengling Flight", "Zazzo's Lager Point", "Angels Envy Bourbon 750ml", "Benchmark Bourbon", "Blantons 750ml", "Buffalo Trace Bourbon 1L", "Bulleit Bourbon 1L", "Bulleit Rye 1L", "Crown Royal 1L", "Crown Royal Apple 1L", "Crown Royal Peach 1L", "Dewars White 1L", "Doughball", "E&J", "E.H. Taylor", "Eagle Rare Bourbon 750ml", "Elijah Craig Small Batch 750ml", "Glenlivit", "High West Bourbon", "Horse Soldier", "Jack Daniels", "Jack Fire", "Jack Honey", "Jameson", "Jim Beam", "Knob Creek", "Makers Mark", "Michters", "Old Forrester 1870", "Old Forrester 1910", "Old Weller Antique 1L", "Pinhook Rye", "Proper 12", "Red Breast", "Redemption", "Row 94", "Russell's", "Sazerac Rye", "Seagrams 7", "Seagrams VO", "Skrewball", "SoComfort", "Templeton Rye", "Tullamore Dew", "WhistlePig Piggyback", "WhistlePig Rye", "Wild Turkey", "Woodford Reserve", "Zazzo's Bourbon", "Zazzos Straight", "Aviation 1L", "Bombay Sapphire 1L", "Hendricks", "Tanqueray", "Zazzo's Gin", "Aperol 1L", "Baileys", "Chambord 750ml", "Cointreau 1L", "Dekuyper Blue Curacao 750ml", "Dekuyper Butterscotch 1L", "Dekuyper Peachtree Schnapps", "Dekuyper Triple Sec 1L", "Disaranno Amaretto 1L", "Frangelico 1L", "Gallo Vermouth Dry 750ml", "Gallo Vermouth Sweet 750ml", "Grand Marnier 1L", "Jager", "Kahlua", "Midori", "Mr. Boston Sour Apple Schnapps", "Rumchata", "Rumplemintz", "Sambuca", "Select Apertif", "St Germain", "Tippy Cow", "Barrits Ginger Beer", "Barrits Grapefruit Soda", "Berg Rootbeer", "Luxardo Cherries", "Owens Transfusion", "Redbull", "Roses Grenedine", "Zing Zang Bloody Mary", "Zing Zang Sour Mix", "Bacardi Sup Light 1L", "Captain Morgan Spiced 1L", "Don Q 151", "Myers Rum", "RumHaven", "Zazzo's Rum", "Chica Chida Agave Peanut Butter", "Clase Azul Reposado 750ml", "Don Julio Blanco 750ml", "Gran Patron Burdeos Anejo 750ml", "Milagro Tequila", "Montezuma Tequila", "Siete Leguas Anejo 750ml", "Siete Leguas Blanco 750ml", "Zazzos Tequila", "Absolut 1L", "Grey Goose 1L", "High Noon Black Cherry", "High Noon Mango", "High Noon peach", "High Noon Peach Tea", "High Noon Pineapple", "High noon Watermelon", "Ketel One", "Sobieski", "Sobieski Cytron", "Sobieski Vanilla", "Suncruiser", "Titos Handmade Vodka 1L", "White Claw Black Cherry", "Zazzo's Vodka", "Capsolado Pinot Grigio", "CR Cabernet Sauvignon", "CR Chardonnay", "CR Moscato Muscat", "CR Pinot Grigio", "CR Pinot Noir", "CR Sauvignon Blanc", "Decoy Cabernet Sauvignon", "Decoy Pinot Noir", "Fr Estate Cabernet Sauvignon", "Hahn Pinot Noir", "Harken Chardonnay", "Josh Cabernet", "LaMarca Split", "Lambrusco", "Lyre Sparkling N.A.", "Ruffino Chianti", "Santa Margherita Pinot Grigio", "Terrazas Malbec", "Unshackled", "Whitehaven Sauvion Blanc", "Orin Swift Mannequin Rare White Blend", "Vodkade Blue", "Vodkade Orange", "Vodkade Red"];
 function orderGuideRank(name) { const i = ORDER_GUIDE_SEQUENCE.indexOf(name); return i === -1 ? 9999 : i; }
+
+// Depletion-report-only grouping (per Ely's request: Beer > Draft/Bottled,
+// Wine > Red/White/Champagne, Liquor > Whiskey/Vodka/Gin/Miscellaneous, each
+// alphabetical within). This is purely a display/sort concern for this one
+// screen — doesn't touch Master data, counting, or any other screen.
+// "Unshackled" and "Lambrusco" have no varietal in their Master name; classified
+// by known brand identity (Unshackled = Cabernet blend, Lambrusco = red) — flag
+// to Ely if either should be different.
+const WINE_SUBGROUP = {
+  "CR Cabernet Sauvignon": "Red", "CR Chardonnay": "White", "CR Moscato Muscat": "White",
+  "CR Pinot Grigio": "White", "CR Pinot Noir": "Red", "CR Sauvignon Blanc": "White",
+  "Capsolado Pinot Grigio": "White", "Decoy Cabernet Sauvignon": "Red", "Decoy Pinot Noir": "Red",
+  "Fr Estate Cabernet Sauvignon": "Red", "Hahn Pinot Noir": "Red", "Harken Chardonnay": "White",
+  "Josh Cabernet": "Red", "LaMarca Split": "Champagne", "Lambrusco": "Red",
+  "Lyre Sparkling N.A.": "Champagne", "Orin Swift Mannequin Rare White Blend": "White",
+  "Ruffino Chianti": "Red", "Santa Margherita Pinot Grigio": "White", "Terrazas Malbec": "Red",
+  "Unshackled": "Red", "Whitehaven Sauvion Blanc": "White",
+};
+function depletionGroup(p) {
+  if (p.category === "Beer") {
+    return { top: "Beer", sub: p.orderUnit === "Keg" ? "Draft" : "Bottled" };
+  }
+  if (p.category === "Wine") {
+    return { top: "Wine", sub: WINE_SUBGROUP[p.name] || "Red" };
+  }
+  // Everything else is Liquor-family: Vodka, Gin, Rum, Tequila, Bourbon, Liquor, Misc
+  if (p.category === "Bourbon") return { top: "Liquor", sub: "Whiskey" };
+  if (p.category === "Vodka") return { top: "Liquor", sub: "Vodka" };
+  if (p.category === "Gin") return { top: "Liquor", sub: "Gin" };
+  return { top: "Liquor", sub: "Miscellaneous" }; // Rum, Tequila, Liquor, Misc
+}
+const TOP_ORDER = ["Beer", "Wine", "Liquor"];
+const SUB_ORDER = { Beer: ["Draft", "Bottled"], Wine: ["Red", "White", "Champagne"], Liquor: ["Whiskey", "Vodka", "Gin", "Miscellaneous"] };
+function sortForDepletion(master) {
+  return [...master].sort((a, b) => {
+    const ga = depletionGroup(a), gb = depletionGroup(b);
+    const ta = TOP_ORDER.indexOf(ga.top), tb = TOP_ORDER.indexOf(gb.top);
+    if (ta !== tb) return ta - tb;
+    const sa = SUB_ORDER[ga.top].indexOf(ga.sub), sb = SUB_ORDER[gb.top].indexOf(gb.sub);
+    if (sa !== sb) return sa - sb;
+    return a.name.localeCompare(b.name);
+  });
+}
 const KEG_PLUS_PER_KEG = { "Stone Buenaveza": 62, "Moretti": 62 }; // pony kegs; everything else defaults to 93
 function poursPerKeg(name) { return KEG_PLUS_PER_KEG[name] || 93; }
 
@@ -992,7 +1035,7 @@ function sumStockForProduct(stock, name) {
 
 /* ───────────────────────── NAV ───────────────────────── */
 /* ───────────────────────── HOME (tile menu) ───────────────────────── */
-const APP_VERSION = "v9.6";
+const APP_VERSION = "v9.7";
 
 function Home({ onNavigate, onClearAll }) {
   const tapCountRef = useRef(0);
@@ -1735,7 +1778,7 @@ function DepletionScreen({ master, stock, setStock, received, setReceived, lastW
   const importRef = useRef(null);
   const salesTotals = combineSalesSession(session);
   const masterNames = new Set(master.map(p => p.name));
-  const sorted = [...master].sort((a, b) => orderGuideRank(a.name) - orderGuideRank(b.name));
+  const sorted = sortForDepletion(master);
   const archived = selectedCount !== "current" ? archivedCounts.find(c => c.id === selectedCount) : null;
 
   async function handleOrderGuideImport(e) {
@@ -1792,7 +1835,8 @@ function DepletionScreen({ master, stock, setStock, received, setReceived, lastW
     const sales = salesTotals[p.name] || 0;
     const depletion = lastWk + rec - current;
     const variance = sales - depletion;
-    return { name: p.name, category: p.category, lastWk, rec, current, depletion, sales, variance };
+    const grp = depletionGroup(p);
+    return { name: p.name, category: p.category, lastWk, rec, current, depletion, sales, variance, top: grp.top, sub: grp.sub };
   });
   const archivedRows = archived ? sorted.map(p => {
     const current = (archived.sealed_counts || {})[p.name] || 0;
@@ -1801,7 +1845,8 @@ function DepletionScreen({ master, stock, setStock, received, setReceived, lastW
     const sales = (archived.pos_sales || {})[p.name] || 0;
     const depletion = lastWk + rec - current;
     const variance = sales - depletion;
-    return { name: p.name, category: p.category, lastWk, rec, current, depletion, sales, variance };
+    const grp = depletionGroup(p);
+    return { name: p.name, category: p.category, lastWk, rec, current, depletion, sales, variance, top: grp.top, sub: grp.sub };
   }) : null;
   const rows = archived ? archivedRows : liveRows;
 
@@ -1860,22 +1905,41 @@ function DepletionScreen({ master, stock, setStock, received, setReceived, lastW
           h("th", { style: { textAlign: "center" } }, "Variance")
         )),
         h("tbody", null,
-          rows.map(r => [
-            h("tr", { key: r.name, onClick: () => setExpandedRow(expandedRow === r.name ? null : r.name), style: { cursor: "pointer" } },
-              h("td", null, r.name),
-              h("td", { className: "qty" }, Math.round(r.depletion * 100) / 100),
-              h("td", { className: "qty" }, Math.round(r.sales * 100) / 100),
-              h("td", { className: "qty", style: { color: r.variance < -0.01 ? "#C8102E" : r.variance > 0.01 ? "#B36A00" : "#1B6B3A", fontWeight: 600 } },
-                Math.round(r.variance * 100) / 100)
-            ),
-            expandedRow === r.name && h("tr", { key: r.name + "-math" },
-              h("td", { colSpan: 4, style: { background: "#FAFAFA", padding: "10px 14px", fontSize: 12.5, fontFamily: "'Courier New',monospace", color: "#333" } },
-                `Depletion:  ${fmt2(r.lastWk)} (Last Wk)  +  ${fmt2(r.rec)} (Received)  −  ${fmt2(r.current)} (Current)  =  ${Math.round(r.depletion * 100) / 100}`,
-                h("br"),
-                `Variance:   ${fmt2(r.sales)} (Sales)  −  ${Math.round(r.depletion * 100) / 100} (Depletion)  =  ${Math.round(r.variance * 100) / 100}`
+          rows.flatMap((r, i) => {
+            const prev = rows[i - 1];
+            const showTop = !prev || prev.top !== r.top;
+            const showSub = showTop || prev.sub !== r.sub;
+            const out = [];
+            if (showTop) {
+              out.push(h("tr", { key: r.top + "-header" },
+                h("td", { colSpan: 4, style: { background: "#C8102E", color: "#FFFFFF", fontWeight: 700, fontSize: 13, padding: "8px 12px" } }, r.top)
+              ));
+            }
+            if (showSub) {
+              out.push(h("tr", { key: r.top + "-" + r.sub + "-header" },
+                h("td", { colSpan: 4, style: { background: "#F0F0F0", color: "#333", fontWeight: 700, fontSize: 11.5, textTransform: "uppercase", letterSpacing: "0.04em", padding: "6px 12px" } }, r.sub)
+              ));
+            }
+            out.push(
+              h("tr", { key: r.name, onClick: () => setExpandedRow(expandedRow === r.name ? null : r.name), style: { cursor: "pointer" } },
+                h("td", null, r.name),
+                h("td", { className: "qty" }, Math.round(r.depletion * 100) / 100),
+                h("td", { className: "qty" }, Math.round(r.sales * 100) / 100),
+                h("td", { className: "qty", style: { color: r.variance < -0.01 ? "#C8102E" : r.variance > 0.01 ? "#B36A00" : "#1B6B3A", fontWeight: 600 } },
+                  Math.round(r.variance * 100) / 100)
               )
-            )
-          ])
+            );
+            if (expandedRow === r.name) {
+              out.push(h("tr", { key: r.name + "-math" },
+                h("td", { colSpan: 4, style: { background: "#FAFAFA", padding: "10px 14px", fontSize: 12.5, fontFamily: "'Courier New',monospace", color: "#333" } },
+                  `Depletion:  ${fmt2(r.lastWk)} (Last Wk)  +  ${fmt2(r.rec)} (Received)  −  ${fmt2(r.current)} (Current)  =  ${Math.round(r.depletion * 100) / 100}`,
+                  h("br"),
+                  `Variance:   ${fmt2(r.sales)} (Sales)  −  ${Math.round(r.depletion * 100) / 100} (Depletion)  =  ${Math.round(r.variance * 100) / 100}`
+                )
+              ));
+            }
+            return out;
+          })
         )
       )
     ),

@@ -1047,7 +1047,7 @@ function sumStockForProduct(stock, name) {
 
 /* ───────────────────────── NAV ───────────────────────── */
 /* ───────────────────────── HOME (tile menu) ───────────────────────── */
-const APP_VERSION = "v9.9";
+const APP_VERSION = "v10.0";
 
 function Home({ onNavigate, onClearAll }) {
   const tapCountRef = useRef(0);
@@ -1973,15 +1973,14 @@ function CountHistoryScreen({ archivedCounts, onHome, onRefresh }) {
   const sorted = [...archivedCounts].reverse();
 
   function buildRows(c) {
-    return sortForDepletion(MASTER_DATA).map(p => {
+    return MASTER_DATA.map(p => {
       const current = (c.sealed_counts || {})[p.name] || 0;
       const lastWk = ((c.orders || {}).last_week || {})[p.name] || 0;
       const rec = ((c.orders || {}).received || {})[p.name] || 0;
       const sales = (c.pos_sales || {})[p.name] || 0;
       const depletion = lastWk + rec - current;
       const variance = sales - depletion;
-      const grp = depletionGroup(p);
-      return { name: p.name, category: p.category, lastWk, rec, current, depletion, sales, variance, top: grp.top, sub: grp.sub };
+      return { name: p.name, category: p.category, lastWk, rec, current, depletion, sales, variance };
     });
   }
 

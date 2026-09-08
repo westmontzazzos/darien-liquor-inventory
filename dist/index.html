@@ -513,7 +513,8 @@ const PLU_MAPS = {
     "2948": "Michelob Ultra", "2957": "Michelob Ultra", "2966": "Michelob Ultra", "2975": "Michelob Ultra", "2984": "Michelob Ultra",
     "2950": "High Life", "2959": "High Life", "2968": "High Life", "2977": "High Life", "2986": "High Life",
     "2951": "Miller Lite", "2960": "Miller Lite", "2969": "Miller Lite", "2978": "Miller Lite", "2987": "Miller Lite",
-    "3439": "Yuengling", "3440": "Yuengling",
+    "3439": "Yuengling Flight", "3440": "Yuengling Flight",
+    "3248": "Modelo", "3249": "Modelo", "3250": "Modelo", "3251": "Modelo", "3252": "Modelo",
     // Legacy entries from the original spreadsheet — untested against a real report, kept as-is:
     "3220": "Bud Sunday Bucket",
   },
@@ -991,7 +992,7 @@ function sumStockForProduct(stock, name) {
 
 /* ───────────────────────── NAV ───────────────────────── */
 /* ───────────────────────── HOME (tile menu) ───────────────────────── */
-const APP_VERSION = "v9.5";
+const APP_VERSION = "v9.6";
 
 function Home({ onNavigate, onClearAll }) {
   const tapCountRef = useRef(0);

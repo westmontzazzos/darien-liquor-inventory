@@ -644,7 +644,18 @@ const WINE_SUBGROUP = {
   "Ruffino Chianti": "Red", "Santa Margherita Pinot Grigio": "White", "Terrazas Malbec": "Red",
   "Unshackled": "Red", "Whitehaven Sauvion Blanc": "White",
 };
+// Canned/RTD seltzer-style products — Master lists these under "Vodka" since that's
+// the liquor they contain, but for Depletion grouping they belong with Beer (same
+// fridge, same sales pattern as beer, not a liquor pour).
+const SELTZER_NAMES = new Set([
+  "High Noon Black Cherry", "High Noon Mango", "High Noon Peach Tea", "High Noon Pineapple",
+  "High Noon peach", "High noon Watermelon", "Suncruiser", "Vodkade Blue", "Vodkade Orange",
+  "Vodkade Red", "White Claw Black Cherry",
+]);
 function depletionGroup(p) {
+  if (SELTZER_NAMES.has(p.name)) {
+    return { top: "Beer", sub: "Seltzer" };
+  }
   if (p.category === "Beer") {
     return { top: "Beer", sub: p.orderUnit === "Keg" ? "Draft" : "Bottled" };
   }
@@ -655,10 +666,11 @@ function depletionGroup(p) {
   if (p.category === "Bourbon") return { top: "Liquor", sub: "Whiskey" };
   if (p.category === "Vodka") return { top: "Liquor", sub: "Vodka" };
   if (p.category === "Gin") return { top: "Liquor", sub: "Gin" };
-  return { top: "Liquor", sub: "Miscellaneous" }; // Rum, Tequila, Liquor, Misc
+  if (p.category === "Tequila") return { top: "Liquor", sub: "Tequila" };
+  return { top: "Liquor", sub: "Miscellaneous" }; // Rum, Liquor, Misc
 }
 const TOP_ORDER = ["Beer", "Wine", "Liquor"];
-const SUB_ORDER = { Beer: ["Draft", "Bottled"], Wine: ["Red", "White", "Champagne"], Liquor: ["Whiskey", "Vodka", "Gin", "Miscellaneous"] };
+const SUB_ORDER = { Beer: ["Draft", "Bottled", "Seltzer"], Wine: ["Red", "White", "Champagne"], Liquor: ["Whiskey", "Vodka", "Gin", "Tequila", "Miscellaneous"] };
 function sortForDepletion(master) {
   return [...master].sort((a, b) => {
     const ga = depletionGroup(a), gb = depletionGroup(b);
@@ -1035,7 +1047,7 @@ function sumStockForProduct(stock, name) {
 
 /* ───────────────────────── NAV ───────────────────────── */
 /* ───────────────────────── HOME (tile menu) ───────────────────────── */
-const APP_VERSION = "v9.7";
+const APP_VERSION = "v9.8";
 
 function Home({ onNavigate, onClearAll }) {
   const tapCountRef = useRef(0);

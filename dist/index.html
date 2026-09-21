@@ -158,8 +158,8 @@ async function sbPatch(table, filter, body) {
 }
 
 const MASTER_DATA = [
-  {"name": "Ambigram", "category": "Beer", "locations": ["Bar"], "vendor": "Sch", "orderUnit": "Keg"},
-  {"name": "Blue Moon Draft", "category": "Beer", "locations": ["Front", "Bar"], "vendor": "Eu", "orderUnit": "Keg"},
+  {"name": "Ambigram", "category": "Beer", "locations": ["Bar"], "vendor": "Sch", "orderUnit": "Keg", "active": false},
+  {"name": "Blue Moon Draft", "category": "Beer", "locations": ["Front", "Bar"], "vendor": "Eu", "orderUnit": "Keg", "active": false},
   {"name": "Bud Light", "category": "Beer", "locations": ["Front", "Bar", "Outside"], "vendor": "Sup", "orderUnit": "Case"},
   {"name": "Budweiser", "category": "Beer", "locations": ["Front", "Bar", "Outside"], "vendor": "Sup", "orderUnit": "Case"},
   {"name": "Ciderboys", "category": "Beer", "locations": ["Front", "Bar"], "vendor": "Sch", "orderUnit": "Case"},
@@ -167,27 +167,27 @@ const MASTER_DATA = [
   {"name": "Corona", "category": "Beer", "locations": ["Front", "Bar"], "vendor": "Eu", "orderUnit": "Case"},
   {"name": "Corona Light", "category": "Beer", "locations": ["Front", "Bar"], "vendor": "Eu", "orderUnit": "Case"},
   {"name": "Daura", "category": "Beer", "locations": ["Front", "Bar"], "vendor": "Sup", "orderUnit": "Case"},
-  {"name": "Dos Equis", "category": "Beer", "locations": ["Front", "Outside"], "vendor": "Sch", "orderUnit": "Keg"},
+  {"name": "Dos Equis", "category": "Beer", "locations": ["Front", "Outside"], "vendor": "Sch", "orderUnit": "Keg", "active": false},
   {"name": "Guinness", "category": "Beer", "locations": ["Bar"], "vendor": "WC", "orderUnit": "Case"},
   {"name": "Heineken", "category": "Beer", "locations": ["Front", "Bar"], "vendor": "Eu", "orderUnit": "Case"},
   {"name": "High Life", "category": "Beer", "locations": ["Front", "Bar"], "vendor": "Eu", "orderUnit": "Case"},
-  {"name": "Labatt", "category": "Beer", "locations": ["Front"], "vendor": "Sch", "orderUnit": "Keg"},
-  {"name": "LongSnapper", "category": "Beer", "locations": ["Bar"], "vendor": "Sch", "orderUnit": "Keg"},
+  {"name": "Labatt", "category": "Beer", "locations": ["Front"], "vendor": "Sch", "orderUnit": "Keg", "active": false},
+  {"name": "LongSnapper", "category": "Beer", "locations": ["Bar"], "vendor": "Sch", "orderUnit": "Keg", "active": false},
   {"name": "Michelob Ultra", "category": "Beer", "locations": ["Front", "Bar", "Outside"], "vendor": "Eu", "orderUnit": "Case"},
   {"name": "Miller Lite", "category": "Beer", "locations": ["Front", "Bar", "Outside"], "vendor": "Eu", "orderUnit": "Case"},
-  {"name": "Miller Lite Draft", "category": "Beer", "locations": ["Bar", "Outside"], "vendor": "Eu", "orderUnit": "Keg"},
+  {"name": "Miller Lite Draft", "category": "Beer", "locations": ["Bar", "Outside"], "vendor": "Eu", "orderUnit": "Keg", "active": false},
   {"name": "Modelo", "category": "Beer", "locations": ["Bar"], "vendor": "Eu", "orderUnit": "Case"},
-  {"name": "Moretti", "category": "Beer", "locations": ["Bar", "Outside"], "vendor": "Sch", "orderUnit": "Keg"},
-  {"name": "Old Style", "category": "Beer", "locations": ["Front", "Outside"], "vendor": "Sch", "orderUnit": "Keg"},
-  {"name": "Shiner", "category": "Beer", "locations": ["Bar"], "vendor": "Sch", "orderUnit": "Keg"},
-  {"name": "Spatan", "category": "Beer", "locations": [], "vendor": "Sch", "orderUnit": "Keg"},
-  {"name": "Stella Artois", "category": "Beer", "locations": ["Front", "Outside"], "vendor": "Sch", "orderUnit": "Keg"},
+  {"name": "Moretti", "category": "Beer", "locations": ["Bar", "Outside"], "vendor": "Sch", "orderUnit": "Keg", "active": false},
+  {"name": "Old Style", "category": "Beer", "locations": ["Front", "Outside"], "vendor": "Sch", "orderUnit": "Keg", "active": false},
+  {"name": "Shiner", "category": "Beer", "locations": ["Bar"], "vendor": "Sch", "orderUnit": "Keg", "active": false},
+  {"name": "Spatan", "category": "Beer", "locations": [], "vendor": "Sch", "orderUnit": "Keg", "active": false},
+  {"name": "Stella Artois", "category": "Beer", "locations": ["Front", "Outside"], "vendor": "Sch", "orderUnit": "Keg", "active": false},
   {"name": "Stella Liberte N.A.", "category": "Beer", "locations": ["Front", "Bar"], "vendor": "Sch", "orderUnit": "Case"},
-  {"name": "Stone Buenaveza", "category": "Beer", "locations": ["Front", "Bar"], "vendor": "Sch", "orderUnit": "Keg"},
-  {"name": "Stone IPA", "category": "Beer", "locations": ["Front"], "vendor": "Sch", "orderUnit": "Keg"},
-  {"name": "Yuengling", "category": "Beer", "locations": ["Front", "Outside"], "vendor": "Sch", "orderUnit": "Keg"},
+  {"name": "Stone Buenaveza", "category": "Beer", "locations": ["Front", "Bar"], "vendor": "Sch", "orderUnit": "Keg", "active": false},
+  {"name": "Stone IPA", "category": "Beer", "locations": ["Front"], "vendor": "Sch", "orderUnit": "Keg", "active": false},
+  {"name": "Yuengling", "category": "Beer", "locations": ["Front", "Outside"], "vendor": "Sch", "orderUnit": "Keg", "active": false},
   {"name": "Yuengling Flight", "category": "Beer", "locations": ["Front", "Bar", "Outside"], "vendor": "Eu", "orderUnit": "Case"},
-  {"name": "Zazzo's Lager Point", "category": "Beer", "locations": ["Front", "Outside"], "vendor": "Sch", "orderUnit": "Keg"},
+  {"name": "Zazzo's Lager Point", "category": "Beer", "locations": ["Front", "Outside"], "vendor": "Sch", "orderUnit": "Keg", "active": false},
   {"name": "Angels Envy Bourbon 750ml", "category": "Bourbon", "locations": ["Bar"], "vendor": "Sou", "orderUnit": "Btl"},
   {"name": "Benchmark Bourbon", "category": "Bourbon", "locations": ["Bar"], "vendor": "Bkt", "orderUnit": "Btl"},
   {"name": "Blantons 750ml", "category": "Bourbon", "locations": ["Bar", "Office"], "vendor": "Bkt", "orderUnit": "Btl"},
@@ -330,6 +330,10 @@ const MASTER_DATA = [
   {"name": "Unshackled", "category": "Wine", "locations": ["Front", "Bar"], "vendor": "Sou", "orderUnit": "Case"},
   {"name": "Whitehaven Sauvion Blanc", "category": "Wine", "locations": ["Front", "Bar"], "vendor": "Bkt", "orderUnit": "Case"},
 ];
+
+// Kegs marked active:false above are hidden from all live counting/depletion screens.
+// Historical (already-closed) counts still show them as they were actually counted.
+const ACTIVE_MASTER_DATA = MASTER_DATA.filter(p => p.active !== false);
 
 const PLU_MAPS = {
   beer: {
@@ -576,7 +580,7 @@ const PLU_MAPS = {
     "2612": {"item": "High Noon", "mult": 4},
     "3132": {"item": "High Noon", "mult": 4},
     "3432": {"item": "High Noon Peach Tea", "mult": 4},
-    "3438": {"item": "Suncruiser", "mult": 6},
+    "3438": {"item": "Suncruiser", "mult": 4},
     "159159": {"item": "Decoy Pinot Noir", "mult": 1},
     "3401": {"item": "Decoy Cabernet Sauvignon", "mult": 1},
     "258258": {"item": "Santa Margherita Pinot Grigio", "mult": 1},
@@ -1047,7 +1051,7 @@ function sumStockForProduct(stock, name) {
 
 /* ───────────────────────── NAV ───────────────────────── */
 /* ───────────────────────── HOME (tile menu) ───────────────────────── */
-const APP_VERSION = "v10.3";
+const APP_VERSION = "v10.4";
 
 function Home({ onNavigate, onClearAll }) {
   const tapCountRef = useRef(0);
@@ -2156,7 +2160,7 @@ function App() {
     const dateEnd = window.prompt("Date range end for Count " + countNumber + " (e.g. 7/7/26):", "");
     if (dateEnd === null) return; // cancelled
     const sealed_counts = {};
-    for (const p of MASTER_DATA) sealed_counts[p.name] = sumStockForProduct(stock, p.name);
+    for (const p of ACTIVE_MASTER_DATA) sealed_counts[p.name] = sumStockForProduct(stock, p.name);
     const pos_sales = combineSalesSession(session);
     const ok = await sbPost("darien_archives", {
       week_label: "Count " + countNumber,
@@ -2168,7 +2172,7 @@ function App() {
     if (!ok) { alert("Couldn't save Count " + countNumber + " to the database — nothing was cleared. Try again."); return; }
     await refreshArchives();
     const newLastWeek = {};
-    for (const p of MASTER_DATA) newLastWeek[p.name] = sumStockForProduct(stock, p.name);
+    for (const p of ACTIVE_MASTER_DATA) newLastWeek[p.name] = sumStockForProduct(stock, p.name);
     setLastWeek(newLastWeek);
     setStock({});
     setReceived({});
@@ -2190,12 +2194,12 @@ function App() {
 
   return h(React.Fragment, null,
     screen === "home" && h(Home, { onNavigate: setScreen, onClearAll: clearAll }),
-    screen === "stock" && h(StockScreen, { master: MASTER_DATA, stock, setStock, onHome: goHome, archivedCounts, selectedCount, setSelectedCount }),
-    screen === "received" && h(ReceivedScreen, { master: MASTER_DATA, received, setReceived, onHome: goHome, archivedCounts, selectedCount, setSelectedCount }),
-    screen === "speedline" && h(SpeedlineScreen, { master: MASTER_DATA, session, setSession, onHome: goHome }),
-    screen === "speedlineoutput" && h(SpeedlineOutputScreen, { master: MASTER_DATA, session, onHome: goHome, archivedCounts, selectedCount, setSelectedCount }),
-    screen === "manualvsspeedline" && h(ManualVsSpeedlineScreen, { master: MASTER_DATA, manualCounts, setManualCounts, session, onHome: goHome, archivedCounts, selectedCount, setSelectedCount }),
-    screen === "depletion" && h(DepletionScreen, { master: MASTER_DATA, stock, setStock, received, setReceived, lastWeek, setLastWeek, session, onCloseCount: closeCount, onHome: goHome, onNavigate: setScreen, archivedCounts, selectedCount, setSelectedCount, setManualCounts }),
+    screen === "stock" && h(StockScreen, { master: ACTIVE_MASTER_DATA, stock, setStock, onHome: goHome, archivedCounts, selectedCount, setSelectedCount }),
+    screen === "received" && h(ReceivedScreen, { master: ACTIVE_MASTER_DATA, received, setReceived, onHome: goHome, archivedCounts, selectedCount, setSelectedCount }),
+    screen === "speedline" && h(SpeedlineScreen, { master: ACTIVE_MASTER_DATA, session, setSession, onHome: goHome }),
+    screen === "speedlineoutput" && h(SpeedlineOutputScreen, { master: ACTIVE_MASTER_DATA, session, onHome: goHome, archivedCounts, selectedCount, setSelectedCount }),
+    screen === "manualvsspeedline" && h(ManualVsSpeedlineScreen, { master: ACTIVE_MASTER_DATA, manualCounts, setManualCounts, session, onHome: goHome, archivedCounts, selectedCount, setSelectedCount }),
+    screen === "depletion" && h(DepletionScreen, { master: ACTIVE_MASTER_DATA, stock, setStock, received, setReceived, lastWeek, setLastWeek, session, onCloseCount: closeCount, onHome: goHome, onNavigate: setScreen, archivedCounts, selectedCount, setSelectedCount, setManualCounts }),
     screen === "counthistory" && h(CountHistoryScreen, { archivedCounts, onHome: goHome, onRefresh: refreshArchives })
   );
 }

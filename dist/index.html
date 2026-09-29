@@ -1051,44 +1051,39 @@ function sumStockForProduct(stock, name) {
 
 /* ───────────────────────── NAV ───────────────────────── */
 /* ───────────────────────── HOME (tile menu) ───────────────────────── */
-const APP_VERSION = "v11.0";
+const APP_VERSION = "v11.1";
 
 function OrganizationScreen({ master, onHome }) {
-  const groups = groupMasterByLocation(master);
+  const rows = master.map(p => ({ name: p.name, currentLocation: p.locations.join(", ") }));
   function exportPDF() {
-    const sections = LOCATIONS.filter(loc => groups[loc] && groups[loc].length).map(loc => ({
-      heading: "Organization Sheet — " + loc,
-      columns: [
-        { key: "name", header: "Product", width: 220 },
-        { key: "category", header: "Category", width: 120 },
-        { key: "newLocation", header: "New Location", width: 150 },
-      ],
-      rows: groups[loc]
-        .slice()
-        .sort((a, b) => a.category.localeCompare(b.category) || orderGuideRank(a.name) - orderGuideRank(b.name))
-        .map(p => ({ name: p.name, category: p.category, newLocation: "" })),
-    }));
-    downloadPDF({ filename: "Darien-Organization.pdf", title: "DARIEN LIQUOR INVENTORY", sections });
+    downloadPDF({
+      filename: "Darien-Organization.pdf",
+      title: "DARIEN LIQUOR INVENTORY",
+      sections: [{
+        heading: "Organization Sheet",
+        columns: [
+          { key: "name", header: "Product", width: 220 },
+          { key: "currentLocation", header: "Current Location", width: 150 },
+          { key: "newLocation", header: "New Location", width: 150 },
+        ],
+        rows: rows.map(r => ({ name: r.name, currentLocation: r.currentLocation, newLocation: "" })),
+      }],
+    });
   }
   return h(React.Fragment, null,
     h(ScreenHeader, { onHome, onExportPDF: exportPDF }),
     h("main", { className: "Page", style: { paddingTop: 20 } },
-      LOCATIONS.map(loc => h("div", { className: "Card", key: loc },
-        h("div", { className: "Card-title" }, loc, h("span", { className: "CatBadge" }, groups[loc].length + " items")),
-        groups[loc].length === 0
-          ? h("div", { style: { padding: "12px 0", color: "#888", fontSize: 14 } }, "No items")
-          : h("table", null,
-              h("thead", null, h("tr", null, h("th", null, "Product"), h("th", null, "Category"), h("th", null, "New Location"))),
-              h("tbody", null,
-                groups[loc]
-                  .slice()
-                  .sort((a, b) => a.category.localeCompare(b.category) || orderGuideRank(a.name) - orderGuideRank(b.name))
-                  .map(p => h("tr", { key: p.name },
-                    h("td", null, p.name), h("td", null, p.category), h("td", null, "")
-                  ))
-              )
-            )
-      ))
+      h("div", { className: "Card" },
+        h("div", { className: "Card-title" }, "Organization", h("span", { className: "CatBadge" }, rows.length + " items")),
+        h("table", null,
+          h("thead", null, h("tr", null, h("th", null, "Product"), h("th", null, "Current Location"), h("th", null, "New Location"))),
+          h("tbody", null,
+            rows.map(r => h("tr", { key: r.name },
+              h("td", null, r.name), h("td", null, r.currentLocation), h("td", null, "")
+            ))
+          )
+        )
+      )
     )
   );
 }

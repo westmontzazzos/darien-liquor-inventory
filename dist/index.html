@@ -564,7 +564,7 @@ const PLU_MAPS = {
     "3197": {"item": "Shandy", "mult": 6},
     "3198": {"item": "Bud Zero", "mult": 6},
     "3437": {"item": "Yuengling Flight", "mult": 6},
-    "3255": {"item": "Stella Zero", "mult": 6},
+    "3255": {"item": "Stella Liberte N.A.", "mult": 6},
     "231334687": {"item": "Zazzo's Vodka", "mult": 1},
     "23144762": {"item": "Zazzo's Gin", "mult": 1},
     "23155763": {"item": "Zazzo's Rum", "mult": 1},
@@ -1051,7 +1051,47 @@ function sumStockForProduct(stock, name) {
 
 /* ───────────────────────── NAV ───────────────────────── */
 /* ───────────────────────── HOME (tile menu) ───────────────────────── */
-const APP_VERSION = "v10.4";
+const APP_VERSION = "v11.0";
+
+function OrganizationScreen({ master, onHome }) {
+  const groups = groupMasterByLocation(master);
+  function exportPDF() {
+    const sections = LOCATIONS.filter(loc => groups[loc] && groups[loc].length).map(loc => ({
+      heading: "Organization Sheet — " + loc,
+      columns: [
+        { key: "name", header: "Product", width: 220 },
+        { key: "category", header: "Category", width: 120 },
+        { key: "newLocation", header: "New Location", width: 150 },
+      ],
+      rows: groups[loc]
+        .slice()
+        .sort((a, b) => a.category.localeCompare(b.category) || orderGuideRank(a.name) - orderGuideRank(b.name))
+        .map(p => ({ name: p.name, category: p.category, newLocation: "" })),
+    }));
+    downloadPDF({ filename: "Darien-Organization.pdf", title: "DARIEN LIQUOR INVENTORY", sections });
+  }
+  return h(React.Fragment, null,
+    h(ScreenHeader, { onHome, onExportPDF: exportPDF }),
+    h("main", { className: "Page", style: { paddingTop: 20 } },
+      LOCATIONS.map(loc => h("div", { className: "Card", key: loc },
+        h("div", { className: "Card-title" }, loc, h("span", { className: "CatBadge" }, groups[loc].length + " items")),
+        groups[loc].length === 0
+          ? h("div", { style: { padding: "12px 0", color: "#888", fontSize: 14 } }, "No items")
+          : h("table", null,
+              h("thead", null, h("tr", null, h("th", null, "Product"), h("th", null, "Category"), h("th", null, "New Location"))),
+              h("tbody", null,
+                groups[loc]
+                  .slice()
+                  .sort((a, b) => a.category.localeCompare(b.category) || orderGuideRank(a.name) - orderGuideRank(b.name))
+                  .map(p => h("tr", { key: p.name },
+                    h("td", null, p.name), h("td", null, p.category), h("td", null, "")
+                  ))
+              )
+            )
+      ))
+    )
+  );
+}
 
 function Home({ onNavigate, onClearAll }) {
   const tapCountRef = useRef(0);
@@ -1080,6 +1120,7 @@ function Home({ onNavigate, onClearAll }) {
     { key: "speedlineoutput", role: "Speedline Output", name: "This week's sales by item", icon: "📄" },
     { key: "manualvsspeedline", role: "Manual vs Speedline", name: "Compare to Order Guide", icon: "⚖️" },
     { key: "depletion", role: "Depletion Report", name: "Theoretical vs actual", icon: "📊" },
+    { key: "organization", role: "Organization", name: "Reorganize by location", icon: "🗂️" },
   ];
   return h("div", { className: "Login" },
     h("div", { className: "Login-brand" },
@@ -2200,6 +2241,7 @@ function App() {
     screen === "speedlineoutput" && h(SpeedlineOutputScreen, { master: ACTIVE_MASTER_DATA, session, onHome: goHome, archivedCounts, selectedCount, setSelectedCount }),
     screen === "manualvsspeedline" && h(ManualVsSpeedlineScreen, { master: ACTIVE_MASTER_DATA, manualCounts, setManualCounts, session, onHome: goHome, archivedCounts, selectedCount, setSelectedCount }),
     screen === "depletion" && h(DepletionScreen, { master: ACTIVE_MASTER_DATA, stock, setStock, received, setReceived, lastWeek, setLastWeek, session, onCloseCount: closeCount, onHome: goHome, onNavigate: setScreen, archivedCounts, selectedCount, setSelectedCount, setManualCounts }),
+    screen === "organization" && h(OrganizationScreen, { master: ACTIVE_MASTER_DATA, onHome: goHome }),
     screen === "counthistory" && h(CountHistoryScreen, { archivedCounts, onHome: goHome, onRefresh: refreshArchives })
   );
 }

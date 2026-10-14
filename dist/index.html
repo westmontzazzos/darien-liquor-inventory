@@ -1051,7 +1051,7 @@ function sumStockForProduct(stock, name) {
 
 /* ───────────────────────── NAV ───────────────────────── */
 /* ───────────────────────── HOME (tile menu) ───────────────────────── */
-const APP_VERSION = "v11.1";
+const APP_VERSION = "v12.0";
 
 function OrganizationScreen({ master, onHome }) {
   const rows = master.map(p => ({ name: p.name, currentLocation: p.locations.join(", ") }));
@@ -1088,6 +1088,52 @@ function OrganizationScreen({ master, onHome }) {
   );
 }
 
+function CloseoutScreen({ onCloseCount, onHome, archivedCounts, session }) {
+  const countNumber = archivedCounts.length + 1;
+  const [closing, setClosing] = useState(false);
+  async function handleClose() {
+    if (!window.confirm("Close Count " + countNumber + "? This archives this week's numbers and cannot be undone.")) return;
+    setClosing(true);
+    await onCloseCount();
+    setClosing(false);
+  }
+  return h(React.Fragment, null,
+    h(ScreenHeader, { onHome }),
+    h("main", { className: "Page", style: { paddingTop: 20 } },
+      h("div", { className: "Card", style: { textAlign: "center", padding: "32px 20px" } },
+        h("div", { style: { fontSize: 15, color: "#555", marginBottom: 20, lineHeight: 1.5 } },
+          "This archives Count " + countNumber + " and rolls current stock forward as next week's Last Week. This cannot be undone."
+        ),
+        h("button", {
+          className: "B B-green",
+          style: { fontSize: 18, padding: "16px 32px" },
+          disabled: closing,
+          onClick: handleClose
+        }, closing ? "Closing…" : "Close Count " + countNumber)
+      )
+    )
+  );
+}
+
+function AnalysisScreen({ onNavigate, onHome }) {
+  const tiles = [
+    { key: "speedlineoutput", role: "Speedline Output", name: "This week's sales by item", icon: "📄" },
+    { key: "manualvsspeedline", role: "Manual vs Speedline", name: "Compare to Order Guide", icon: "⚖️" },
+    { key: "organization", role: "Organization", name: "Reorganize by location", icon: "🗂️" },
+  ];
+  return h(React.Fragment, null,
+    h(ScreenHeader, { onHome }),
+    h("main", { className: "Page", style: { paddingTop: 20 } },
+      h("div", { className: "Login-grid" },
+        tiles.map(t => h("div", { key: t.key, className: "LCard", onClick: () => onNavigate(t.key) },
+          h("div", { className: "LCard-role" }, t.role),
+          h("div", { className: "LCard-name" }, t.name)
+        ))
+      )
+    )
+  );
+}
+
 function Home({ onNavigate, onClearAll }) {
   const tapCountRef = useRef(0);
   const tapTimerRef = useRef(null);
@@ -1110,12 +1156,11 @@ function Home({ onNavigate, onClearAll }) {
   }
   const tiles = [
     { key: "stock", role: "Current Stock", name: "Count by section", icon: "📋" },
-    { key: "received", role: "Received Items", name: "Log deliveries", icon: "📥" },
+    { key: "received", role: "Receive Stock", name: "Log deliveries", icon: "📥" },
     { key: "speedline", role: "Sales Reports", name: "Speedline intake", icon: "🧾" },
-    { key: "speedlineoutput", role: "Speedline Output", name: "This week's sales by item", icon: "📄" },
-    { key: "manualvsspeedline", role: "Manual vs Speedline", name: "Compare to Order Guide", icon: "⚖️" },
     { key: "depletion", role: "Depletion Report", name: "Theoretical vs actual", icon: "📊" },
-    { key: "organization", role: "Organization", name: "Reorganize by location", icon: "🗂️" },
+    { key: "closeout", role: "Closeout Week", name: "Archive this count", icon: "🔒" },
+    { key: "analysis", role: "Analysis", name: "Speedline output, comparisons, organization", icon: "🔎" },
   ];
   return h("div", { className: "Login" },
     h("div", { className: "Login-brand" },
@@ -1944,8 +1989,7 @@ function DepletionScreen({ master, stock, setStock, received, setReceived, lastW
       h("button", { className: "B B-outline", onClick: () => onNavigate("counthistory") }, "📚 Count History"),
       h("button", { className: "B B-outline", onClick: exportShowMathPDF }, "⬇️ Show Math (PDF)"),
       !archived && h("input", { type: "file", accept: ".xlsx", ref: importRef, onChange: handleOrderGuideImport, style: { display: "none" } }),
-      !archived && h("button", { className: "B B-red", onClick: () => importRef.current && importRef.current.click() }, "📥 Upload Order Guide"),
-      !archived && h("button", { className: "B B-green", onClick: onCloseCount }, "Close Count " + countNumber)
+      !archived && h("button", { className: "B B-red", onClick: () => importRef.current && importRef.current.click() }, "📥 Upload Order Guide")
     ),
     importMsg && h("div", { className: "empty" }, importMsg),
     h("div", { className: "Card" },
@@ -2237,6 +2281,8 @@ function App() {
     screen === "manualvsspeedline" && h(ManualVsSpeedlineScreen, { master: ACTIVE_MASTER_DATA, manualCounts, setManualCounts, session, onHome: goHome, archivedCounts, selectedCount, setSelectedCount }),
     screen === "depletion" && h(DepletionScreen, { master: ACTIVE_MASTER_DATA, stock, setStock, received, setReceived, lastWeek, setLastWeek, session, onCloseCount: closeCount, onHome: goHome, onNavigate: setScreen, archivedCounts, selectedCount, setSelectedCount, setManualCounts }),
     screen === "organization" && h(OrganizationScreen, { master: ACTIVE_MASTER_DATA, onHome: goHome }),
+    screen === "closeout" && h(CloseoutScreen, { onCloseCount: closeCount, onHome: goHome, archivedCounts, session }),
+    screen === "analysis" && h(AnalysisScreen, { onNavigate: setScreen, onHome: goHome }),
     screen === "counthistory" && h(CountHistoryScreen, { archivedCounts, onHome: goHome, onRefresh: refreshArchives })
   );
 }

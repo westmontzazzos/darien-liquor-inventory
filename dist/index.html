@@ -1054,7 +1054,7 @@ function sumStockForProduct(stock, name) {
 
 /* ───────────────────────── NAV ───────────────────────── */
 /* ───────────────────────── HOME (tile menu) ───────────────────────── */
-const APP_VERSION = "v12.1";
+const APP_VERSION = "v12.2";
 
 function OrganizationScreen({ master, onHome }) {
   const rows = master.map(p => ({ name: p.name, currentLocation: p.locations.join(", ") }));
@@ -1973,28 +1973,35 @@ function DepletionScreen({ master, stock, setStock, received, setReceived, lastW
 
   function exportShowMathPDF() {
     const label = archived ? archived.week_label : "Count " + countNumber;
+    const columns = [
+      { key: "name", header: "Product", width: 150 },
+      { key: "lastWk", header: "Last Wk", width: 55, align: "right" },
+      { key: "rec", header: "Received", width: 55, align: "right" },
+      { key: "current", header: "Current", width: 55, align: "right" },
+      { key: "depletion", header: "= Deplet.", width: 55, align: "right" },
+      { key: "sales", header: "Sales", width: 55, align: "right" },
+      { key: "variance", header: "= Variance", width: 60, align: "right" },
+    ];
+    const sections = [];
+    let curTop = null, curSub = null, curRows = null;
+    for (const r of rows) {
+      if (r.top !== curTop || r.sub !== curSub) {
+        if (curRows) sections.push({ heading: `${label} — ${curTop} — ${curSub}`, columns, rows: curRows });
+        curTop = r.top; curSub = r.sub; curRows = [];
+      }
+      curRows.push({
+        name: r.name,
+        lastWk: fmt2(r.lastWk), rec: fmt2(r.rec), current: fmt2(r.current),
+        depletion: fmt2(Math.round(r.depletion * 100) / 100),
+        sales: fmt2(r.sales),
+        variance: fmt2(Math.round(r.variance * 100) / 100),
+      });
+    }
+    if (curRows) sections.push({ heading: `${label} — ${curTop} — ${curSub}`, columns, rows: curRows });
     downloadPDF({
       filename: `Darien-${label.replace(/\s+/g, "-")}-Show-Math.pdf`,
       title: "DARIEN LIQUOR INVENTORY",
-      sections: [{
-        heading: `${label} — Show Math`,
-        columns: [
-          { key: "name", header: "Product", width: 150 },
-          { key: "lastWk", header: "Last Wk", width: 55, align: "right" },
-          { key: "rec", header: "Received", width: 55, align: "right" },
-          { key: "current", header: "Current", width: 55, align: "right" },
-          { key: "depletion", header: "= Deplet.", width: 55, align: "right" },
-          { key: "sales", header: "Sales", width: 55, align: "right" },
-          { key: "variance", header: "= Variance", width: 60, align: "right" },
-        ],
-        rows: rows.map(r => ({
-          name: r.name,
-          lastWk: fmt2(r.lastWk), rec: fmt2(r.rec), current: fmt2(r.current),
-          depletion: fmt2(Math.round(r.depletion * 100) / 100),
-          sales: fmt2(r.sales),
-          variance: fmt2(Math.round(r.variance * 100) / 100),
-        })),
-      }],
+      sections,
     });
   }
 

@@ -1028,11 +1028,29 @@ function getProductsMissingPLU(master) {
   return master.filter(p => !covered.has(p.name));
 }
 
+// Bar display order is category-based (not the general Order Guide sequence):
+// Gin, Vodka, Rum, Bourbon, Tequila, Liquor/Misc, Wine, Beer. Every other
+// location (Front, Office, Outside) keeps the standard orderGuideRank sort.
+const BAR_CATEGORY_ORDER = ["Gin", "Vodka", "Rum", "Bourbon", "Tequila", "Liq", "Mis", "Wine", "Beer"];
+function barCategoryRank(p) {
+  const i = BAR_CATEGORY_ORDER.indexOf(p.category);
+  return i === -1 ? 999 : i;
+}
 function groupMasterByLocation(master) {
   const groups = {};
   for (const loc of LOCATIONS) groups[loc] = [];
   for (const p of master) for (const loc of p.locations) groups[loc].push(p);
-  for (const loc of LOCATIONS) groups[loc].sort((a, b) => orderGuideRank(a.name) - orderGuideRank(b.name));
+  for (const loc of LOCATIONS) {
+    if (loc === "Bar") {
+      groups[loc].sort((a, b) => {
+        const ca = barCategoryRank(a), cb = barCategoryRank(b);
+        if (ca !== cb) return ca - cb;
+        return orderGuideRank(a.name) - orderGuideRank(b.name);
+      });
+    } else {
+      groups[loc].sort((a, b) => orderGuideRank(a.name) - orderGuideRank(b.name));
+    }
+  }
   return groups;
 }
 
@@ -1051,7 +1069,7 @@ function sumStockForProduct(stock, name) {
 
 /* ───────────────────────── NAV ───────────────────────── */
 /* ───────────────────────── HOME (tile menu) ───────────────────────── */
-const APP_VERSION = "v12.8";
+const APP_VERSION = "v12.9";
 
 function OrganizationScreen({ master, onHome }) {
   const rows = master.map(p => ({ name: p.name, currentLocation: p.locations.join(", ") }));

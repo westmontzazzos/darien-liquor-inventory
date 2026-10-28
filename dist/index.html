@@ -293,22 +293,22 @@ const MASTER_DATA = [
   {"name": "Zazzos Tequila", "category": "Tequila", "locations": ["Bar", "Office"], "vendor": "Cello", "orderUnit": "Case"},
   {"name": "Absolut 1L", "category": "Vodka", "locations": ["Bar", "Office"], "vendor": "Sou", "orderUnit": "Btl"},
   {"name": "Grey Goose 1L", "category": "Vodka", "locations": ["Bar", "Office"], "vendor": "Sou", "orderUnit": "Btl"},
-  {"name": "High Noon Black Cherry", "category": "Vodka", "locations": ["Bar", "Office"], "vendor": "Bkt", "orderUnit": "Case"},
-  {"name": "High Noon Mango", "category": "Vodka", "locations": ["Bar", "Office"], "vendor": "Bkt", "orderUnit": "Case"},
-  {"name": "High Noon Peach Tea", "category": "Vodka", "locations": ["Bar"], "vendor": "Bkt", "orderUnit": "Case"},
-  {"name": "High Noon Pineapple", "category": "Vodka", "locations": ["Bar", "Office"], "vendor": "Bkt", "orderUnit": "Case"},
-  {"name": "High Noon peach", "category": "Vodka", "locations": ["Bar", "Office"], "vendor": "Bkt", "orderUnit": "Case"},
-  {"name": "High noon Watermelon", "category": "Vodka", "locations": ["Bar", "Office"], "vendor": "Bkt", "orderUnit": "Case"},
+  {"name": "High Noon Black Cherry", "category": "Beer", "locations": ["Bar", "Office"], "vendor": "Bkt", "orderUnit": "Case"},
+  {"name": "High Noon Mango", "category": "Beer", "locations": ["Bar", "Office"], "vendor": "Bkt", "orderUnit": "Case"},
+  {"name": "High Noon Peach Tea", "category": "Beer", "locations": ["Bar"], "vendor": "Bkt", "orderUnit": "Case"},
+  {"name": "High Noon Pineapple", "category": "Beer", "locations": ["Bar", "Office"], "vendor": "Bkt", "orderUnit": "Case"},
+  {"name": "High Noon peach", "category": "Beer", "locations": ["Bar", "Office"], "vendor": "Bkt", "orderUnit": "Case"},
+  {"name": "High noon Watermelon", "category": "Beer", "locations": ["Bar", "Office"], "vendor": "Bkt", "orderUnit": "Case"},
   {"name": "Ketel One", "category": "Vodka", "locations": ["Bar", "Office"], "vendor": "Bkt", "orderUnit": "Btl"},
   {"name": "Sobieski", "category": "Vodka", "locations": [], "vendor": "Bkt", "orderUnit": "Btl"},
   {"name": "Sobieski Cytron", "category": "Vodka", "locations": ["Bar", "Office"], "vendor": "Bkt", "orderUnit": "Btl"},
   {"name": "Sobieski Vanilla", "category": "Vodka", "locations": ["Bar", "Office"], "vendor": "Bkt", "orderUnit": "Btl"},
-  {"name": "Suncruiser", "category": "Vodka", "locations": ["Bar"], "vendor": "Eu", "orderUnit": "Case"},
+  {"name": "Suncruiser", "category": "Beer", "locations": ["Bar"], "vendor": "Eu", "orderUnit": "Case"},
   {"name": "Titos Handmade Vodka 1L", "category": "Vodka", "locations": ["Bar", "Office"], "vendor": "Bkt", "orderUnit": "Case"},
-  {"name": "Vodkade Blue", "category": "Vodka", "locations": ["Bar", "Office"], "vendor": "Sch", "orderUnit": "Case"},
-  {"name": "Vodkade Orange", "category": "Vodka", "locations": ["Bar", "Office"], "vendor": "Sch", "orderUnit": "Case"},
-  {"name": "Vodkade Red", "category": "Vodka", "locations": ["Bar", "Office"], "vendor": "Sch", "orderUnit": "Case"},
-  {"name": "White Claw Black Cherry", "category": "Vodka", "locations": ["Front", "Bar"], "vendor": "Eu", "orderUnit": "Case"},
+  {"name": "Vodkade Blue", "category": "Beer", "locations": ["Bar", "Office"], "vendor": "Sch", "orderUnit": "Case"},
+  {"name": "Vodkade Orange", "category": "Beer", "locations": ["Bar", "Office"], "vendor": "Sch", "orderUnit": "Case"},
+  {"name": "Vodkade Red", "category": "Beer", "locations": ["Bar", "Office"], "vendor": "Sch", "orderUnit": "Case"},
+  {"name": "White Claw Black Cherry", "category": "Beer", "locations": ["Front", "Bar"], "vendor": "Eu", "orderUnit": "Case"},
   {"name": "Zazzo's Vodka", "category": "Vodka", "locations": ["Bar", "Office"], "vendor": "Cello", "orderUnit": "Case"},
   {"name": "CR Cabernet Sauvignon", "category": "Wine", "locations": ["Front", "Bar"], "vendor": "Bkt", "orderUnit": "Case"},
   {"name": "CR Chardonnay", "category": "Wine", "locations": ["Front", "Bar"], "vendor": "Bkt", "orderUnit": "Case"},
@@ -576,11 +576,11 @@ const PLU_MAPS = {
     "3454": {"item": "Zazzos Straight", "mult": 1},
     "3196": {"item": "White Claw Black Cherry", "mult": 8},
     "1771": {"item": "High Noon", "mult": 4},
-    "2608": {"item": "High Noon", "mult": 4},
-    "2609": {"item": "High Noon", "mult": 4},
-    "2610": {"item": "High Noon", "mult": 4},
-    "2611": {"item": "High Noon", "mult": 4},
-    "2612": {"item": "High Noon", "mult": 4},
+    "2608": {"item": "High noon Watermelon", "mult": 4},
+    "2609": {"item": "High Noon Black Cherry", "mult": 4},
+    "2610": {"item": "High Noon Pineapple", "mult": 4},
+    "2611": {"item": "High Noon peach", "mult": 4},
+    "2612": {"item": "High Noon Mango", "mult": 4},
     "3132": {"item": "High Noon", "mult": 4},
     "3432": {"item": "High Noon Peach Tea", "mult": 4},
     "3438": {"item": "Suncruiser", "mult": 4},
@@ -1054,7 +1054,7 @@ function sumStockForProduct(stock, name) {
 
 /* ───────────────────────── NAV ───────────────────────── */
 /* ───────────────────────── HOME (tile menu) ───────────────────────── */
-const APP_VERSION = "v12.2";
+const APP_VERSION = "v12.3";
 
 function OrganizationScreen({ master, onHome }) {
   const rows = master.map(p => ({ name: p.name, currentLocation: p.locations.join(", ") }));
@@ -1169,7 +1169,7 @@ function Home({ onNavigate, onClearAll }) {
   }
   const tiles = [
     { key: "stock", role: "Current Stock", name: "Count by section", icon: "📋" },
-    { key: "received", role: "Receive Stock", name: "Log deliveries", icon: "📥" },
+    { key: "received", role: "Received Stock", name: "Log deliveries", icon: "📥" },
     { key: "speedline", role: "Sales Reports", name: "Speedline intake", icon: "🧾" },
     { key: "depletion", role: "Depletion Report", name: "Theoretical vs actual", icon: "📊" },
     { key: "closeout", role: "Closeout Week", name: "Archive this count", icon: "🔒" },
@@ -1381,8 +1381,37 @@ function StockScreen({ master, stock, setStock, onHome, archivedCounts, selected
 }
 
 /* ───────────────────────── RECEIVED SCREEN ───────────────────────── */
+// Received Stock is organized Vendor -> Category group (Liquor / Beer & Seltzers / Wine),
+// bottled beer only (master is already ACTIVE_MASTER_DATA, which excludes all keg beer —
+// every keg-type Beer item is marked inactive — but we also guard on orderUnit directly
+// in case an active keg is ever added).
+const RECEIVED_CATEGORY_ORDER = ["Liquor", "Beer & Seltzers", "Wine"];
+function receivedCategoryGroup(p) {
+  if (p.category === "Beer") return "Beer & Seltzers";
+  if (p.category === "Wine") return "Wine";
+  return "Liquor"; // Bourbon, Gin, Liq, Mis, Rum, Tequila, Vodka
+}
+function receivedVendorGroups(master) {
+  const bottledOnly = master.filter(p => p.orderUnit !== "Keg");
+  const byVendor = {};
+  for (const p of bottledOnly) {
+    const vendor = p.vendor || "Name Needed";
+    if (!byVendor[vendor]) byVendor[vendor] = [];
+    byVendor[vendor].push(p);
+  }
+  const vendorNames = Object.keys(byVendor).sort((a, b) => a.localeCompare(b));
+  return vendorNames.map(vendor => {
+    const items = [...byVendor[vendor]].sort((a, b) => {
+      const ga = RECEIVED_CATEGORY_ORDER.indexOf(receivedCategoryGroup(a));
+      const gb = RECEIVED_CATEGORY_ORDER.indexOf(receivedCategoryGroup(b));
+      if (ga !== gb) return ga - gb;
+      return orderGuideRank(a.name) - orderGuideRank(b.name);
+    });
+    return { vendor, items };
+  });
+}
 function ReceivedScreen({ master, received, setReceived, onHome, archivedCounts, selectedCount, setSelectedCount }) {
-  const sorted = [...master].sort((a, b) => orderGuideRank(a.name) - orderGuideRank(b.name));
+  const vendorGroups = receivedVendorGroups(master);
   const archived = selectedCount !== "current" ? archivedCounts.find(c => c.id === selectedCount) : null;
   function update(name, val) {
     const num = val === "" ? null : parseFloat(val);
@@ -1392,38 +1421,54 @@ function ReceivedScreen({ master, received, setReceived, onHome, archivedCounts,
     downloadPDF({
       filename: "Darien-Received.pdf",
       title: "DARIEN LIQUOR INVENTORY",
-      sections: [{
-        heading: "Received This Week",
+      sections: vendorGroups.map(({ vendor, items }) => ({
+        heading: "Received This Week — Vendor: " + vendor,
         columns: [
           { key: "name", header: "Product", width: 220 },
-          { key: "category", header: "Category", width: 110 },
-          { key: "vendor", header: "Vendor", width: 100 },
+          { key: "categoryGroup", header: "Category", width: 130 },
           { key: "received", header: "Received", width: 90, align: "right" },
         ],
-        rows: sorted.map(p => ({ name: p.name, category: p.category, vendor: p.vendor || "", received: received[p.name] ?? "" })),
-      }],
+        rows: items.map(p => ({
+          name: p.name,
+          categoryGroup: receivedCategoryGroup(p),
+          received: archived ? (((archived.orders || {}).received || {})[p.name] ?? "") : (received[p.name] ?? ""),
+        })),
+      })),
     });
   }
   return h(React.Fragment, null,
     h(ScreenHeader, { onHome, onExportPDF: exportPDF }),
     h(CountTabs, { archivedCounts, selectedCount, setSelectedCount }),
     h("main", { className: "Page", style: { paddingTop: 20 } },
-      h("div", { className: "Card" },
-        h("table", null,
-          h("thead", null, h("tr", null, h("th", null, "Product"), h("th", null, "Category"), h("th", null, "Vendor"), h("th", { style: { width: 110, textAlign: "right" } }, "Received"))),
-          h("tbody", null,
-            sorted.map(p => h("tr", { key: p.name },
-              h("td", null, p.name),
-              h("td", null, p.category),
-              h("td", null, p.vendor || ""),
-              archived
-                ? h("td", { className: "qty" }, ((archived.orders || {}).received || {})[p.name] ? fmt2(((archived.orders || {}).received || {})[p.name]) : "")
-                : h("td", null, h("input", {
-                type: "number", step: "any", className: "countinput",
-                value: received[p.name] ?? "",
-                onChange: e => update(p.name, e.target.value)
-              }))
-            ))
+      vendorGroups.map(({ vendor, items }) =>
+        h("div", { key: vendor, className: "Card", style: { marginBottom: 16 } },
+          h("div", { className: "Card-title" }, "Vendor: " + vendor),
+          h("table", null,
+            h("thead", null, h("tr", null, h("th", null, "Product"), h("th", { style: { width: 130 } }, "Category"), h("th", { style: { width: 110, textAlign: "right" } }, "Received"))),
+            h("tbody", null,
+              items.map((p, i) => {
+                const grp = receivedCategoryGroup(p);
+                const prevGrp = i > 0 ? receivedCategoryGroup(items[i - 1]) : null;
+                const rows = [];
+                if (grp !== prevGrp) {
+                  rows.push(h("tr", { key: grp + "-header" },
+                    h("td", { colSpan: 3, style: { background: "#F4F4F6", fontWeight: 700, fontSize: 11, textTransform: "uppercase", letterSpacing: "0.04em", color: "#555", padding: "4px 6px" } }, grp)
+                  ));
+                }
+                rows.push(h("tr", { key: p.name },
+                  h("td", null, p.name),
+                  h("td", null, grp),
+                  archived
+                    ? h("td", { className: "qty" }, ((archived.orders || {}).received || {})[p.name] ? fmt2(((archived.orders || {}).received || {})[p.name]) : "")
+                    : h("td", null, h("input", {
+                    type: "number", step: "any", className: "countinput",
+                    value: received[p.name] ?? "",
+                    onChange: e => update(p.name, e.target.value)
+                  }))
+                ));
+                return rows;
+              })
+            )
           )
         )
       )

@@ -295,9 +295,8 @@ const MASTER_DATA = [
   {"name": "Grey Goose 1L", "category": "Vodka", "locations": ["Bar", "Office"], "vendor": "Sou", "orderUnit": "Btl"},
   {"name": "High Noon Black Cherry", "category": "Beer", "locations": ["Bar", "Office"], "vendor": "Bkt", "orderUnit": "Case"},
   {"name": "High Noon Mango", "category": "Beer", "locations": [], "vendor": "Bkt", "orderUnit": "Case", "active": false},
-  {"name": "High Noon Peach Tea", "category": "Beer", "locations": [], "vendor": "Bkt", "orderUnit": "Case"},
   {"name": "High Noon Pineapple", "category": "Beer", "locations": ["Bar", "Office"], "vendor": "Bkt", "orderUnit": "Case"},
-  {"name": "High Noon peach", "category": "Beer", "locations": ["Bar", "Office"], "vendor": "Bkt", "orderUnit": "Case", "active": false},
+  {"name": "High Noon peach", "category": "Beer", "locations": ["Bar", "Office"], "vendor": "Bkt", "orderUnit": "Case"},
   {"name": "High noon Watermelon", "category": "Beer", "locations": ["Bar", "Office"], "vendor": "Bkt", "orderUnit": "Case"},
   {"name": "Ketel One", "category": "Vodka", "locations": ["Bar", "Office"], "vendor": "Bkt", "orderUnit": "Btl"},
   {"name": "Sobieski", "category": "Vodka", "locations": [], "vendor": "Bkt", "orderUnit": "Btl", "active": false},
@@ -579,7 +578,6 @@ const PLU_MAPS = {
     "2611": {"item": "High Noon peach", "mult": 4},
     "2612": {"item": "High Noon Mango", "mult": 4},
     "3132": {"item": "High Noon", "mult": 4},
-    "3432": {"item": "High Noon Peach Tea", "mult": 4},
     "3438": {"item": "Suncruiser", "mult": 4},
     "159159": {"item": "Decoy Pinot Noir", "mult": 1},
     "3401": {"item": "Decoy Cabernet Sauvignon", "mult": 1},
@@ -1071,7 +1069,7 @@ function sumStockForProduct(stock, name) {
 
 /* ───────────────────────── NAV ───────────────────────── */
 /* ───────────────────────── HOME (tile menu) ───────────────────────── */
-const APP_VERSION = "v12.10";
+const APP_VERSION = "v12.11";
 
 function OrganizationScreen({ master, onHome }) {
   const rows = master.map(p => ({ name: p.name, currentLocation: p.locations.join(", ") }));

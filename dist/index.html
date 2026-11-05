@@ -316,7 +316,7 @@ const MASTER_DATA = [
   {"name": "Decoy Cabernet Sauvignon", "category": "Wine", "locations": [], "vendor": "Bkt", "orderUnit": "Case", "active": false},
   {"name": "Decoy Pinot Noir", "category": "Wine", "locations": [], "vendor": "Bkt", "orderUnit": "Case", "active": false},
   {"name": "Fr Estate Cabernet Sauvignon", "category": "Wine", "locations": [], "vendor": "Bkt", "orderUnit": "Case", "active": false},
-  {"name": "Hahn Pinot Noir", "category": "Wine", "locations": ["Front", "Bar"], "vendor": "Bkt", "orderUnit": "Case", "active": false},
+  {"name": "Hahn Pinot Noir", "category": "Wine", "locations": ["Bar", "Office"], "vendor": "Bkt", "orderUnit": "Case"},
   {"name": "Harken Chardonnay", "category": "Wine", "locations": ["Front", "Bar"], "vendor": "Bkt", "orderUnit": "Case"},
   {"name": "Josh Cabernet", "category": "Wine", "locations": ["Front", "Bar"], "vendor": "Sou", "orderUnit": "Case"},
   {"name": "LaMarca Split", "category": "Wine", "locations": ["Front", "Bar"], "vendor": "Bkt", "orderUnit": "Case"},
@@ -1069,7 +1069,7 @@ function sumStockForProduct(stock, name) {
 
 /* ───────────────────────── NAV ───────────────────────── */
 /* ───────────────────────── HOME (tile menu) ───────────────────────── */
-const APP_VERSION = "v12.11";
+const APP_VERSION = "v12.13";
 
 function OrganizationScreen({ master, onHome }) {
   const rows = master.map(p => ({ name: p.name, currentLocation: p.locations.join(", ") }));
@@ -2297,6 +2297,14 @@ function App() {
     } catch (e) { console.error("Failed to load archived counts:", e); }
   }
   useEffect(() => { refreshArchives(); }, []);
+  // Last Week for the open count always comes from the newest saved count's ending
+  // counts, so a correction to a saved count carries into the next count automatically
+  // (the device-saved copy is overwritten whenever the saved counts load or change).
+  useEffect(() => {
+    if (!archivedCounts.length) return;
+    const latest = archivedCounts[archivedCounts.length - 1];
+    if (latest && latest.sealed_counts) setLastWeek(latest.sealed_counts);
+  }, [archivedCounts]);
 
   // Load saved state once on mount (device-local only — see note in chat).
   useEffect(() => {

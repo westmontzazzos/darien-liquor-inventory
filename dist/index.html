@@ -1073,6 +1073,144 @@ function findUncountedSales(session, masterNames) {
   return problems;
 }
 
+// ───────── Sales by PLU (edit the individual report lines) ─────────
+// Every report that is loaded keeps its text, so one PLU line can be changed and the whole
+// batch is simply re-run through the same parser. Nothing is calculated a second way.
+const ROW_FORMATS = {
+  salesByItem: {
+    re: /^(\d{4,9})\s+(.+?)\s+(\d+)\s+([\d,]+\.\d{2})\s+([\d.]+)$/,
+    qty: m => parseInt(m[3]), label: m => m[2],
+    build: (m, q) => m[1] + " " + m[2] + " " + q + " " + m[4] + " " + m[5],
+  },
+  modifier: {
+    re: /^(\d{4,5})\s+(.+?)\s+(\d+)$/,
+    qty: m => parseInt(m[3]), label: m => m[2], skip: m => m[2] === "Total",
+    build: (m, q) => m[1] + " " + m[2] + " " + q,
+  },
+  liquor: {
+    re: /^(\d{4,5})\s+(.+?)\s+(Neat|Rocks|Short|Tall|Double|Shot|Mixed|Martini)\s+(\d+)\s+([\d,]+\.\d{2})$/,
+    qty: m => parseInt(m[4]), label: m => m[2] + " (" + m[3] + ")",
+    build: (m, q) => m[1] + " " + m[2] + " " + m[3] + " " + q + " " + m[5],
+  },
+  wine: {
+    re: /^(\d{4,5})\s+(.+?)\s+(Bottle|Glass)\s+(\d+)\s+([\d,]+\.\d{2})$/,
+    qty: m => parseInt(m[4]), label: m => m[2] + " (" + m[3] + ")",
+    build: (m, q) => m[1] + " " + m[2] + " " + m[3] + " " + q + " " + m[5],
+  },
+};
+const ROW_FORMAT_FOR_TYPE = {
+  beer: "salesByItem", carryout: "salesByItem", nonalcoholic: "salesByItem", specialty: "salesByItem",
+  bucket: "modifier", bucket_bottles: "modifier", highnoon: "modifier", vodkade: "modifier", nonalcoholic_modifier: "modifier",
+  liquor: "liquor", wine: "wine",
+};
+function parseEditableRows(text, type) {
+  const fmt = ROW_FORMATS[ROW_FORMAT_FOR_TYPE[type]];
+  if (!fmt) return [];
+  const rows = [];
+  text.split("\n").forEach((line, lineIdx) => {
+    const m = line.trim().match(fmt.re);
+    if (m && !(fmt.skip && fmt.skip(m))) rows.push({ lineIdx, plu: m[1], name: fmt.label(m), qty: fmt.qty(m) });
+  });
+  return rows;
+}
+function setRowQty(text, lineIdx, newQty, type) {
+  const fmt = ROW_FORMATS[ROW_FORMAT_FOR_TYPE[type]];
+  const lines = text.split("\n");
+  const m = lines[lineIdx].trim().match(fmt.re);
+  if (!m) return text;
+  lines[lineIdx] = fmt.build(m, newQty);
+  return lines.join("\n");
+}
+function mergeCounts(target, source) {
+  for (const [k, v] of Object.entries(source)) target[k] = (target[k] || 0) + v;
+}
+function buildBatchResult(sources, master) {
+  const bottles = {}, kegs = {}, flags = [];
+  for (const [type, info] of Object.entries(sources)) {
+    const result = runParser(type, info.text, master);
+    if (result.bottles) mergeCounts(bottles, result.bottles);
+    if (result.kegs) mergeCounts(kegs, result.kegs);
+    if (result.flags) flags.push(...result.flags);
+  }
+  return { bottles, kegs, flags };
+}
+function PluQtyCell({ value, onCommit }) {
+  const shown = String(value);
+  const [draft, setDraft] = useState(shown);
+  useEffect(() => { setDraft(shown); }, [shown]);
+  function commit() {
+    if (draft === shown) return;
+    const n = parseInt(draft, 10);
+    if (isNaN(n) || n < 0) { setDraft(shown); return; }
+    onCommit(n);
+  }
+  return h("input", {
+    type: "number", step: "1", inputMode: "numeric", className: "countinput", value: draft,
+    onChange: e => setDraft(e.target.value), onBlur: commit,
+    onKeyDown: e => { if (e.key === "Enter") e.target.blur(); }
+  });
+}
+function SalesByPLUScreen({ master, session, setSession, onHome }) {
+  const loaded = session.map((e, i) => ({ e, i })).filter(x => x.e.sources);
+  function commit(entryIdx, type, lineIdx, n) {
+    const entry = session[entryIdx];
+    const src = entry.sources[type];
+    const sources = { ...entry.sources, [type]: { ...src, text: setRowQty(src.text, lineIdx, n, type) } };
+    setSession(session.map((e, i) => i === entryIdx ? { ...e, sources, result: buildBatchResult(sources, master) } : e));
+  }
+  return h(React.Fragment, null,
+    h(ScreenHeader, { onHome }),
+    h("main", { className: "Page" },
+      loaded.length === 0
+        ? h("div", { className: "Card" }, h("div", { className: "empty" }, "No PLU lines are loaded. Upload this week's reports on the Sales Reports screen (reports loaded before this version don't keep their PLU lines)."))
+        : h("div", { className: "Card" }, h("div", { className: "empty" }, "Change a PLU's quantity and every total, Depletion and Close Count update. A report loaded twice shows the same PLU twice: set the extra line to 0.")),
+      loaded.map(({ e, i }) => Object.entries(e.sources).map(([type, src]) => {
+        const rows = parseEditableRows(src.text, type);
+        return h("div", { key: i + type, className: "Card" },
+          h("div", { className: "Card-title" }, (REPORT_LABELS[type] || type) + (src.name ? " — " + src.name : "")),
+          h("table", null,
+            h("thead", null, h("tr", null, h("th", null, "PLU"), h("th", null, "Item"), h("th", { style: { width: 110, textAlign: "right" } }, "Qty"))),
+            h("tbody", null, rows.map(r => h("tr", { key: r.lineIdx },
+              h("td", null, r.plu), h("td", null, r.name),
+              h("td", { className: "qty" }, h(PluQtyCell, { value: r.qty, onCommit: n => commit(i, type, r.lineIdx, n) }))
+            )))
+          )
+        );
+      }))
+    )
+  );
+}
+// Saved-count edit: only values that actually changed are written, unknown keys are kept,
+// and a changed ending count is carried into the next saved count's Last Week.
+function buildArchiveEdit(c, next, editRows, editDate) {
+  function merge(original, field) {
+    const out = { ...(original || {}) };
+    for (const p of MASTER_DATA) {
+      const d = editRows[p.name];
+      if (!d) continue;
+      const nv = d[field] || 0, ov = out[p.name] || 0;
+      if (nv !== ov) out[p.name] = nv;
+    }
+    return out;
+  }
+  const sealed_counts = merge(c.sealed_counts, "current");
+  const last_week = merge((c.orders || {}).last_week, "lastWk");
+  const received = merge((c.orders || {}).received, "rec");
+  const pos_sales = merge(c.pos_sales, "sales");
+  const body = { sealed_counts, orders: { ...(c.orders || {}), last_week, received }, pos_sales };
+  if (editDate && editDate.trim() && editDate.trim() !== c.archive_date) body.archive_date = editDate.trim();
+  let nextPatch = null;
+  if (next) {
+    const changed = MASTER_DATA.filter(p => (sealed_counts[p.name] || 0) !== ((c.sealed_counts || {})[p.name] || 0));
+    if (changed.length) {
+      const lw = { ...((next.orders || {}).last_week || {}) };
+      for (const p of changed) lw[p.name] = sealed_counts[p.name] || 0;
+      nextPatch = { orders: { ...(next.orders || {}), last_week: lw } };
+    }
+  }
+  return { body, nextPatch };
+}
+
 // Sold-total edits are kept as one "manual-edit" entry (always first in the session) that
 // holds the difference between the typed total and what the uploaded reports add up to.
 // Every screen that reads combineSalesSession (and Close Count) therefore sees the corrected
@@ -1162,7 +1300,7 @@ function sumStockForProduct(stock, name) {
 
 /* ───────────────────────── NAV ───────────────────────── */
 /* ───────────────────────── HOME (tile menu) ───────────────────────── */
-const APP_VERSION = "v12.18";
+const APP_VERSION = "v12.19";
 
 function OrganizationScreen({ master, onHome }) {
   const rows = master.map(p => ({ name: p.name, currentLocation: p.locations.join(", ") }));
@@ -1231,6 +1369,8 @@ function AnalysisScreen({ onNavigate, onHome }) {
     { key: "speedlineoutput", role: "Speedline Output", name: "This week's sales by item", icon: "📄" },
     { key: "manualvsspeedline", role: "Manual vs Speedline", name: "Compare to Order Guide", icon: "⚖️" },
     { key: "organization", role: "Organization", name: "Reorganize by location", icon: "🗂️" },
+    { key: "salesbyplu", role: "Sales by PLU", name: "Edit each PLU's quantity", icon: "🧮" },
+    { key: "counthistory", role: "Saved Counts", name: "View and edit closed counts", icon: "🗃️" },
   ];
   return h(React.Fragment, null,
     h(ScreenHeader, { onHome }),
@@ -1604,8 +1744,8 @@ function SpeedlineScreen({ master, session, setSession, onHome }) {
       const proceed = window.confirm("This will clear the current Speedline data and replace it with this report. Continue?");
       if (!proceed) return;
     }
-    const result = runParser(type, rawText, master);
-    setSession([{ label: REPORT_LABELS[type] || type, type, result, addedAt: new Date().toLocaleTimeString() }]);
+    const sources = { [type]: { text: rawText, name: "Pasted report" } };
+    setSession([{ label: REPORT_LABELS[type] || type, type, sources, result: buildBatchResult(sources, master), addedAt: new Date().toLocaleTimeString() }]);
     setRawText(""); setDetected(null); setManualType("");
   }
   function clearSession() { setSession([]); }
@@ -1669,20 +1809,14 @@ function SpeedlineScreen({ master, session, setSession, onHome }) {
       const proceed = window.confirm("This will clear the current Speedline data and replace it with what's in these files. Continue?");
       if (!proceed) return;
     }
-    const combinedBottles = {}, combinedKegs = {};
-    const allFlags = [];
-    const typesUsed = [];
-    for (const [type, info] of Object.entries(detectedFiles)) {
-      const result = runParser(type, info.text, master);
-      if (result.bottles) mergeInto(combinedBottles, result.bottles);
-      if (result.kegs) mergeInto(combinedKegs, result.kegs);
-      if (result.flags) allFlags.push(...result.flags);
-      typesUsed.push(REPORT_LABELS[type] || type);
-    }
+    const sources = {};
+    for (const [type, info] of Object.entries(detectedFiles)) sources[type] = { text: info.text, name: info.name };
+    const typesUsed = Object.keys(sources).map(t => REPORT_LABELS[t] || t);
     setSession([{
       label: "Batch Upload (" + typesUsed.join(", ") + ")",
       type: "batch",
-      result: { bottles: combinedBottles, kegs: combinedKegs, flags: allFlags },
+      sources,
+      result: buildBatchResult(sources, master),
       addedAt: new Date().toLocaleTimeString()
     }]);
     setDetectedFiles({});
@@ -2258,6 +2392,7 @@ function CountHistoryScreen({ archivedCounts, onHome, onRefresh }) {
   const [openId, setOpenId] = useState(null);
   const [editId, setEditId] = useState(null);
   const [editRows, setEditRows] = useState({});
+  const [editDate, setEditDate] = useState("");
   const [saving, setSaving] = useState(false);
   const sorted = [...archivedCounts].reverse();
 
@@ -2305,24 +2440,22 @@ function CountHistoryScreen({ archivedCounts, onHome, onRefresh }) {
     const draft = {};
     for (const r of rows) draft[r.name] = { current: r.current, lastWk: r.lastWk, rec: r.rec, sales: r.sales };
     setEditRows(draft);
+    setEditDate(c.archive_date || "");
     setEditId(c.id);
   }
 
   async function saveEdit(c) {
     setSaving(true);
-    const sealed_counts = {}, last_week = {}, received = {}, pos_sales = {};
-    for (const p of MASTER_DATA) {
-      const d = editRows[p.name] || {};
-      sealed_counts[p.name] = d.current || 0;
-      last_week[p.name] = d.lastWk || 0;
-      received[p.name] = d.rec || 0;
-      pos_sales[p.name] = d.sales || 0;
+    const idx = archivedCounts.findIndex(x => x.id === c.id);
+    const next = idx >= 0 ? archivedCounts[idx + 1] : null;
+    const { body, nextPatch } = buildArchiveEdit(c, next, editRows, editDate);
+    const ok = await sbPatch("darien_archives", `id=eq.${c.id}`, body);
+    if (!ok) { setSaving(false); alert("Couldn't save changes — try again."); return; }
+    if (nextPatch) {
+      const ok2 = await sbPatch("darien_archives", `id=eq.${next.id}`, nextPatch);
+      if (!ok2) alert("Saved " + c.week_label + ", but couldn't update Last Week in " + next.week_label + ". Open " + next.week_label + " and fix its Last Wk.");
     }
-    const ok = await sbPatch("darien_archives", `id=eq.${c.id}`, {
-      sealed_counts, orders: { last_week, received }, pos_sales,
-    });
     setSaving(false);
-    if (!ok) { alert("Couldn't save changes — try again."); return; }
     setEditId(null);
     if (onRefresh) await onRefresh();
   }
@@ -2352,7 +2485,11 @@ function CountHistoryScreen({ archivedCounts, onHome, onRefresh }) {
               isEditing && h("button", { className: "B B-green", onClick: () => saveEdit(c), disabled: saving }, saving ? "Saving…" : "💾 Save"),
               isEditing && h("button", { className: "B B-outline", onClick: () => setEditId(null) }, "Cancel")
             ),
-            h("table", { style: { marginTop: 10 } },
+            isEditing && h("div", { style: { marginTop: 10, display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" } },
+              h("span", { style: { fontSize: 12, fontWeight: 700 } }, "Date range"),
+              h("input", { type: "text", value: editDate, onChange: e => setEditDate(e.target.value), style: { height: 34, fontSize: 13, padding: "0 8px", border: "2px solid #E2E2E2", borderRadius: 6, minWidth: 220 } })
+            ),
+            h("div", { style: { overflowX: "auto" } }, h("table", { style: { marginTop: 10, minWidth: 560 } },
               h("thead", null, h("tr", null,
                 h("th", null, "Product"), h("th", null, "Cat"),
                 h("th", { style: { textAlign: "right" } }, "Last Wk"),
@@ -2384,7 +2521,7 @@ function CountHistoryScreen({ archivedCounts, onHome, onRefresh }) {
                     Math.round(r.variance * 100) / 100)
                 ))
               )
-            )
+            ))
           )
         );
       })
@@ -2502,6 +2639,7 @@ function App() {
     screen === "organization" && h(OrganizationScreen, { master: ACTIVE_MASTER_DATA, onHome: goHome }),
     screen === "closeout" && h(CloseoutScreen, { onCloseCount: closeCount, onHome: goHome, archivedCounts, session }),
     screen === "analysis" && h(AnalysisScreen, { onNavigate: setScreen, onHome: goHome }),
+    screen === "salesbyplu" && h(SalesByPLUScreen, { master: ACTIVE_MASTER_DATA, session, setSession, onHome: goHome }),
     screen === "counthistory" && h(CountHistoryScreen, { archivedCounts, onHome: goHome, onRefresh: refreshArchives })
   );
 }

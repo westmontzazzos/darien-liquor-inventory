@@ -1015,6 +1015,41 @@ function combineSalesSession(session) {
   return combined;
 }
 
+// Sold-total edits are kept as one "manual-edit" entry (always first in the session) that
+// holds the difference between the typed total and what the uploaded reports add up to.
+// Every screen that reads combineSalesSession (and Close Count) therefore sees the corrected
+// number. Uploading new reports replaces the whole session, edits included.
+function applySoldEdit(session, name, target) {
+  const reports = session.filter(e => e.type !== "manual-edit");
+  const base = combineSalesSession(reports)[name] || 0;
+  const existing = session.find(e => e.type === "manual-edit");
+  const bottles = existing ? { ...existing.result.bottles } : {};
+  const delta = Math.round((target - base) * 100) / 100;
+  if (delta === 0) delete bottles[name]; else bottles[name] = delta;
+  if (Object.keys(bottles).length === 0) return reports;
+  return [{
+    label: "Manual edits", type: "manual-edit",
+    result: { bottles, kegs: {}, flags: [] },
+    addedAt: existing ? existing.addedAt : new Date().toLocaleTimeString()
+  }, ...reports];
+}
+function SoldEditCell({ value, onCommit }) {
+  const shown = value ? String(Math.round(value * 100) / 100) : "";
+  const [draft, setDraft] = useState(shown);
+  useEffect(() => { setDraft(shown); }, [shown]);
+  function commit() {
+    if (draft === shown) return;
+    const n = draft === "" ? 0 : parseFloat(draft);
+    if (isNaN(n) || n < 0) { setDraft(shown); return; }
+    onCommit(n);
+  }
+  return h("input", {
+    type: "number", step: "any", inputMode: "decimal", className: "countinput", value: draft,
+    onChange: e => setDraft(e.target.value), onBlur: commit,
+    onKeyDown: e => { if (e.key === "Enter") e.target.blur(); }
+  });
+}
+
 // Products that have zero PLU coverage anywhere in PLU_MAPS — these can never
 // show up in Speedline sales no matter what's actually sold, until a PLU is added.
 function getProductsMissingPLU(master) {
@@ -1069,7 +1104,7 @@ function sumStockForProduct(stock, name) {
 
 /* ───────────────────────── NAV ───────────────────────── */
 /* ───────────────────────── HOME (tile menu) ───────────────────────── */
-const APP_VERSION = "v12.13";
+const APP_VERSION = "v12.14";
 
 function OrganizationScreen({ master, onHome }) {
   const rows = master.map(p => ({ name: p.name, currentLocation: p.locations.join(", ") }));
@@ -1592,7 +1627,7 @@ function SpeedlineScreen({ master, session, setSession, onHome }) {
     h("main", { className: "Page" },
     h("div", { className: "Card", style: { background: lastParsedAt ? "#EFF8F1" : "#FDECEA", border: lastParsedAt ? "1px solid #1B6B3A" : "1px solid #F5C0C8" } },
       h("div", { style: { fontSize: 12, fontWeight: 700, color: lastParsedAt ? "#1B6B3A" : "#C8102E" } },
-        lastParsedAt ? ("✓ Session has data — last parsed at " + lastParsedAt + " (" + session.length + " batch" + (session.length === 1 ? "" : "es") + ")") : "⚠ No session data yet — nothing has been parsed since the last clear"
+        lastParsedAt ? ("✓ Session has data — last parsed at " + lastParsedAt + " (" + session.filter(e => e.type !== "manual-edit").length + " batch" + (session.filter(e => e.type !== "manual-edit").length === 1 ? "" : "es") + ")") : "⚠ No session data yet — nothing has been parsed since the last clear"
       )
     ),
     h("div", { className: "Card" },
@@ -1730,7 +1765,7 @@ function SpeedlineOutputPrintSheet({ rows, missingPLU }) {
   );
 }
 
-function SpeedlineOutputScreen({ master, session, onHome, archivedCounts, selectedCount, setSelectedCount }) {
+function SpeedlineOutputScreen({ master, session, setSession, onHome, archivedCounts, selectedCount, setSelectedCount }) {
   const salesTotals = combineSalesSession(session);
   const masterNames = new Set(master.map(p => p.name));
   const sorted = [...master].sort((a, b) => orderGuideRank(a.name) - orderGuideRank(b.name));
@@ -1777,7 +1812,9 @@ function SpeedlineOutputScreen({ master, session, onHome, archivedCounts, select
             rows.map(r => h("tr", { key: r.name },
               h("td", null, r.name),
               h("td", null, r.category),
-              h("td", { className: "qty" }, r.sales ? Math.round(r.sales * 100) / 100 : "")
+              archived
+                ? h("td", { className: "qty" }, r.sales ? Math.round(r.sales * 100) / 100 : "")
+                : h("td", { className: "qty" }, h(SoldEditCell, { value: r.sales, onCommit: n => setSession(applySoldEdit(session, r.name, n)) }))
             ))
           )
         )
@@ -2374,7 +2411,7 @@ function App() {
     screen === "stock" && h(StockScreen, { master: ACTIVE_MASTER_DATA, stock, setStock, onHome: goHome, archivedCounts, selectedCount, setSelectedCount }),
     screen === "received" && h(ReceivedScreen, { master: ACTIVE_MASTER_DATA, received, setReceived, onHome: goHome, archivedCounts, selectedCount, setSelectedCount }),
     screen === "speedline" && h(SpeedlineScreen, { master: ACTIVE_MASTER_DATA, session, setSession, onHome: goHome }),
-    screen === "speedlineoutput" && h(SpeedlineOutputScreen, { master: ACTIVE_MASTER_DATA, session, onHome: goHome, archivedCounts, selectedCount, setSelectedCount }),
+    screen === "speedlineoutput" && h(SpeedlineOutputScreen, { master: ACTIVE_MASTER_DATA, session, setSession, onHome: goHome, archivedCounts, selectedCount, setSelectedCount }),
     screen === "manualvsspeedline" && h(ManualVsSpeedlineScreen, { master: ACTIVE_MASTER_DATA, manualCounts, setManualCounts, session, onHome: goHome, archivedCounts, selectedCount, setSelectedCount }),
     screen === "depletion" && h(DepletionScreen, { master: ACTIVE_MASTER_DATA, stock, setStock, received, setReceived, lastWeek, setLastWeek, session, onCloseCount: closeCount, onHome: goHome, onNavigate: setScreen, archivedCounts, selectedCount, setSelectedCount, setManualCounts }),
     screen === "organization" && h(OrganizationScreen, { master: ACTIVE_MASTER_DATA, onHome: goHome }),

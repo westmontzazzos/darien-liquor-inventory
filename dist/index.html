@@ -504,6 +504,7 @@ const PLU_MAPS = {
     "2868": "Orin Mannequin Chardonnay",
     "3238": "Paraduxx",
     "3354": "LaMarca Split",
+    "2879": "LaMarca Split",
   },
   bucket: {
     // Real "Bucket Bottles" modifier report: each beer has 5 PLUs, one per bucket position.
@@ -861,7 +862,7 @@ function processLiquor(text) {
 // category: any liquor used in a Martini, Mule, Old Fashioned, etc. was invisible to
 // the parser. Recipe data below is pulled live from Zazzo's real recipe_database table,
 // since these are the same drink recipes served at both locations.
-const RECIPE_DATABASE = [{"drink": "Aperol Spritz", "maps_to_master_item": "LaMarca Split", "oz": 1, "tracked": "Yes"}, {"drink": "Aperol Spritz", "maps_to_master_item": "Aperol 1L", "oz": 1, "tracked": "Yes"}, {"drink": "Basil Grapefruit Smash", "maps_to_master_item": "Zazzo's Vodka", "oz": 2, "tracked": "Yes"}, {"drink": "Breakfast Shot", "maps_to_master_item": "Jameson", "oz": 0.75, "tracked": "Yes"}, {"drink": "Chocolate Martini", "maps_to_master_item": "Tippy Cow", "oz": 1, "tracked": "Yes"}, {"drink": "Chocolate Martini", "maps_to_master_item": "Sobieski Vanilla", "oz": 2, "tracked": "Yes"}, {"drink": "Chocolate Peppermint Martini", "maps_to_master_item": "Zazzo's Vodka", "oz": 1.5, "tracked": "Yes"}, {"drink": "Chocolate Peppermint Martini", "maps_to_master_item": "Tippy Cow", "oz": 1, "tracked": "Yes"}, {"drink": "Cinnamon Toast Crunch Shot", "maps_to_master_item": "Fireball Apple", "oz": 0.75, "tracked": "Yes"}, {"drink": "Cinnamon Toast Crunch Shot", "maps_to_master_item": "Rumchata", "oz": 0.25, "tracked": "Yes"}, {"drink": "Colada", "maps_to_master_item": "Zazzo's Rum", "oz": 1.5, "tracked": "Yes"}, {"drink": "Espresso Martini", "maps_to_master_item": "Kahlua", "oz": 0.5, "tracked": "Yes"}, {"drink": "Espresso Martini", "maps_to_master_item": "Sobieski Vanilla", "oz": 1.5, "tracked": "Yes"}, {"drink": "French 75", "maps_to_master_item": "Lamarca Splitz", "oz": 1, "tracked": "Yes"}, {"drink": "French 75", "maps_to_master_item": "Zazzo's Gin", "oz": 0.5, "tracked": "Yes"}, {"drink": "French Martini", "maps_to_master_item": "Zazzo's Vodka", "oz": 1.5, "tracked": "Yes"}, {"drink": "French Martini", "maps_to_master_item": "Chambord", "oz": 0.25, "tracked": "Yes"}, {"drink": "Green Tea Shot", "maps_to_master_item": "Jameson", "oz": 1, "tracked": "Yes"}, {"drink": "Green Tea Shot", "maps_to_master_item": "Peachtree", "oz": 0.5, "tracked": "Yes"}, {"drink": "Irish Mule", "maps_to_master_item": "Jameson", "oz": 1.5, "tracked": "Yes"}, {"drink": "Jaegar Bomb", "maps_to_master_item": "Jager", "oz": 1, "tracked": "Yes"}, {"drink": "Lemon Drop Martini", "maps_to_master_item": "Sobieski Citron", "oz": 2, "tracked": "Yes"}, {"drink": "Margarita", "maps_to_master_item": "Zazzo's Tequila", "oz": 2, "tracked": "Yes"}, {"drink": "Mimosa", "maps_to_master_item": "Lamarca Splitz", "oz": 3, "tracked": "Yes"}, {"drink": "O-Bomb", "maps_to_master_item": "Zazzo's Vodka", "oz": 1, "tracked": "Yes"}, {"drink": "Original Mule", "maps_to_master_item": "Zazzo's Vodka", "oz": 1.5, "tracked": "Yes"}, {"drink": "Paloma", "maps_to_master_item": "Zazzo's Tequila", "oz": 1.5, "tracked": "Yes"}, {"drink": "Perfect Manhattan", "maps_to_master_item": "Woodford Reserve", "oz": 2, "tracked": "Yes"}, {"drink": "Pineapple Upside Down", "maps_to_master_item": "Zazzo's Vodka", "oz": 2, "tracked": "Yes"}, {"drink": "Pretty in Pink", "maps_to_master_item": "Zazzo's Vodka", "oz": 0.75, "tracked": "Yes"}, {"drink": "Pretty in Pink", "maps_to_master_item": "Peachtree", "oz": 0.5, "tracked": "Yes"}, {"drink": "Pretty in Pink", "maps_to_master_item": "Zazzo's Rum", "oz": 1.25, "tracked": "Yes"}, {"drink": "Red Sangria", "maps_to_master_item": null, "oz": null, "tracked": "No"}, {"drink": "Revolver", "maps_to_master_item": "Bulleit Bourbon", "oz": 3, "tracked": "Yes"}, {"drink": "Revolver", "maps_to_master_item": "Kahlua", "oz": 1, "tracked": "Yes"}, {"drink": "Scooby Snack Shot", "maps_to_master_item": "Midori", "oz": 0.75, "tracked": "Yes"}, {"drink": "Scooby Snack Shot", "maps_to_master_item": "Zazzo's Rum", "oz": 0.75, "tracked": "Yes"}, {"drink": "Smokey Old Fashioned", "maps_to_master_item": "Zazzo's Bourbon", "oz": 2, "tracked": "Yes"}, {"drink": "Sparkling Cosmo", "maps_to_master_item": "Lamarca Splitz", "oz": 1, "tracked": "Yes"}, {"drink": "Sparkling Cosmo", "maps_to_master_item": "Tito's", "oz": 1.5, "tracked": "Yes"}, {"drink": "Taste of Italy", "maps_to_master_item": "Peachtree", "oz": 0.5, "tracked": "Yes"}, {"drink": "Taste of Italy", "maps_to_master_item": "Lamarca Splitz", "oz": 1, "tracked": "Yes"}, {"drink": "Taste of Italy", "maps_to_master_item": "Zazzo's Vodka", "oz": 0.5, "tracked": "Yes"}, {"drink": "The Calvary Old Fashioned", "maps_to_master_item": "Horse Soldier", "oz": 2, "tracked": "Yes"}, {"drink": "Thin Mint Shot", "maps_to_master_item": "Tippy Cow", "oz": 1, "tracked": "Yes"}, {"drink": "Thin Mint Shot", "maps_to_master_item": "Rumple Minze", "oz": 0.5, "tracked": "Yes"}, {"drink": "Tiramisu Martini", "maps_to_master_item": "Kahlua", "oz": 0.25, "tracked": "Yes"}, {"drink": "Tiramisu Martini", "maps_to_master_item": "Zazzo's Vodka", "oz": 2, "tracked": "Yes"}, {"drink": "Vegas Bomb", "maps_to_master_item": "Crown Royal", "oz": 1, "tracked": "Yes"}, {"drink": "White Russian", "maps_to_master_item": "Zazzo's Vodka", "oz": 1.25, "tracked": "Yes"}, {"drink": "White Russian", "maps_to_master_item": "Kahlua", "oz": 0.75, "tracked": "Yes"}, {"drink": "White Sangria", "maps_to_master_item": null, "oz": null, "tracked": "No"}, {"drink": "White Tea Shot (Gummy Bear)", "maps_to_master_item": "Zazzo's Vodka", "oz": 1, "tracked": "Yes"}, {"drink": "White Tea Shot (Gummy Bear)", "maps_to_master_item": "Peachtree", "oz": 0.5, "tracked": "Yes"}, {"drink": "Zazzo's Long Island", "maps_to_master_item": "Zazzo's Gin", "oz": 0.25, "tracked": "Yes"}, {"drink": "Zazzo's Long Island", "maps_to_master_item": "Zazzo's Tequila", "oz": 0.25, "tracked": "Yes"}, {"drink": "Zazzo's Long Island", "maps_to_master_item": "Zazzo's Rum", "oz": 0.25, "tracked": "Yes"}, {"drink": "Zazzo's Long Island", "maps_to_master_item": "Zazzo's Vodka", "oz": 0.25, "tracked": "Yes"}, {"drink": "Zazzo's Mama", "maps_to_master_item": "Zazzo's Rum", "oz": 0.75, "tracked": "Yes"}, {"drink": "Zazzo's Mama", "maps_to_master_item": "Rumhaven", "oz": 0.75, "tracked": "Yes"}, {"drink": "Zazzo's Old Fashioned", "maps_to_master_item": "Whistle Pig", "oz": 2, "tracked": "Yes"}, {"drink": "Zazzo's Paloma", "maps_to_master_item": "Zazzo's Tequila", "oz": 1.5, "tracked": "Yes"}, {"drink": "Zazzo's Rootbeer", "maps_to_master_item": "Captain Morgan", "oz": 1.5, "tracked": "Yes"}];
+const RECIPE_DATABASE = [{"drink": "Aperol Spritz", "maps_to_master_item": "LaMarca Split", "oz": 1, "tracked": "Yes"}, {"drink": "Aperol Spritz", "maps_to_master_item": "Aperol 1L", "oz": 1, "tracked": "Yes"}, {"drink": "Basil Grapefruit Smash", "maps_to_master_item": "Zazzo's Vodka", "oz": 2, "tracked": "Yes"}, {"drink": "Breakfast Shot", "maps_to_master_item": "Jameson", "oz": 0.75, "tracked": "Yes"}, {"drink": "Chocolate Martini", "maps_to_master_item": "Tippy Cow", "oz": 1, "tracked": "Yes"}, {"drink": "Chocolate Martini", "maps_to_master_item": "Sobieski Vanilla", "oz": 2, "tracked": "Yes"}, {"drink": "Chocolate Peppermint Martini", "maps_to_master_item": "Zazzo's Vodka", "oz": 1.5, "tracked": "Yes"}, {"drink": "Chocolate Peppermint Martini", "maps_to_master_item": "Tippy Cow", "oz": 1, "tracked": "Yes"}, {"drink": "Cinnamon Toast Crunch Shot", "maps_to_master_item": "Fireball Apple", "oz": 0.75, "tracked": "Yes"}, {"drink": "Cinnamon Toast Crunch Shot", "maps_to_master_item": "Rumchata", "oz": 0.25, "tracked": "Yes"}, {"drink": "Colada", "maps_to_master_item": "Zazzo's Rum", "oz": 1.5, "tracked": "Yes"}, {"drink": "Espresso Martini", "maps_to_master_item": "Kahlua", "oz": 0.5, "tracked": "Yes"}, {"drink": "Espresso Martini", "maps_to_master_item": "Sobieski Vanilla", "oz": 1.5, "tracked": "Yes"}, {"drink": "French 75", "maps_to_master_item": "LaMarca Split", "oz": 1, "tracked": "Yes"}, {"drink": "French 75", "maps_to_master_item": "Zazzo's Gin", "oz": 0.5, "tracked": "Yes"}, {"drink": "French Martini", "maps_to_master_item": "Zazzo's Vodka", "oz": 1.5, "tracked": "Yes"}, {"drink": "French Martini", "maps_to_master_item": "Chambord", "oz": 0.25, "tracked": "Yes"}, {"drink": "Green Tea Shot", "maps_to_master_item": "Jameson", "oz": 1, "tracked": "Yes"}, {"drink": "Green Tea Shot", "maps_to_master_item": "Peachtree", "oz": 0.5, "tracked": "Yes"}, {"drink": "Irish Mule", "maps_to_master_item": "Jameson", "oz": 1.5, "tracked": "Yes"}, {"drink": "Jaegar Bomb", "maps_to_master_item": "Jager", "oz": 1, "tracked": "Yes"}, {"drink": "Lemon Drop Martini", "maps_to_master_item": "Sobieski Citron", "oz": 2, "tracked": "Yes"}, {"drink": "Margarita", "maps_to_master_item": "Zazzo's Tequila", "oz": 2, "tracked": "Yes"}, {"drink": "Mimosa", "maps_to_master_item": "LaMarca Split", "oz": 1, "tracked": "Yes"}, {"drink": "O-Bomb", "maps_to_master_item": "Zazzo's Vodka", "oz": 1, "tracked": "Yes"}, {"drink": "Original Mule", "maps_to_master_item": "Zazzo's Vodka", "oz": 1.5, "tracked": "Yes"}, {"drink": "Paloma", "maps_to_master_item": "Zazzo's Tequila", "oz": 1.5, "tracked": "Yes"}, {"drink": "Perfect Manhattan", "maps_to_master_item": "Woodford Reserve", "oz": 2, "tracked": "Yes"}, {"drink": "Pineapple Upside Down", "maps_to_master_item": "Zazzo's Vodka", "oz": 2, "tracked": "Yes"}, {"drink": "Pretty in Pink", "maps_to_master_item": "Zazzo's Vodka", "oz": 0.75, "tracked": "Yes"}, {"drink": "Pretty in Pink", "maps_to_master_item": "Peachtree", "oz": 0.5, "tracked": "Yes"}, {"drink": "Pretty in Pink", "maps_to_master_item": "Zazzo's Rum", "oz": 1.25, "tracked": "Yes"}, {"drink": "Red Sangria", "maps_to_master_item": null, "oz": null, "tracked": "No"}, {"drink": "Revolver", "maps_to_master_item": "Bulleit Bourbon", "oz": 3, "tracked": "Yes"}, {"drink": "Revolver", "maps_to_master_item": "Kahlua", "oz": 1, "tracked": "Yes"}, {"drink": "Scooby Snack Shot", "maps_to_master_item": "Midori", "oz": 0.75, "tracked": "Yes"}, {"drink": "Scooby Snack Shot", "maps_to_master_item": "Zazzo's Rum", "oz": 0.75, "tracked": "Yes"}, {"drink": "Smokey Old Fashioned", "maps_to_master_item": "Zazzo's Bourbon", "oz": 2, "tracked": "Yes"}, {"drink": "Sparkling Cosmo", "maps_to_master_item": "LaMarca Split", "oz": 1, "tracked": "Yes"}, {"drink": "Sparkling Cosmo", "maps_to_master_item": "Tito's", "oz": 1.5, "tracked": "Yes"}, {"drink": "Taste of Italy", "maps_to_master_item": "Peachtree", "oz": 0.5, "tracked": "Yes"}, {"drink": "Taste of Italy", "maps_to_master_item": "LaMarca Split", "oz": 1, "tracked": "Yes"}, {"drink": "Taste of Italy", "maps_to_master_item": "Zazzo's Vodka", "oz": 0.5, "tracked": "Yes"}, {"drink": "The Calvary Old Fashioned", "maps_to_master_item": "Horse Soldier", "oz": 2, "tracked": "Yes"}, {"drink": "Thin Mint Shot", "maps_to_master_item": "Tippy Cow", "oz": 1, "tracked": "Yes"}, {"drink": "Thin Mint Shot", "maps_to_master_item": "Rumple Minze", "oz": 0.5, "tracked": "Yes"}, {"drink": "Tiramisu Martini", "maps_to_master_item": "Kahlua", "oz": 0.25, "tracked": "Yes"}, {"drink": "Tiramisu Martini", "maps_to_master_item": "Zazzo's Vodka", "oz": 2, "tracked": "Yes"}, {"drink": "Vegas Bomb", "maps_to_master_item": "Crown Royal", "oz": 1, "tracked": "Yes"}, {"drink": "White Russian", "maps_to_master_item": "Zazzo's Vodka", "oz": 1.25, "tracked": "Yes"}, {"drink": "White Russian", "maps_to_master_item": "Kahlua", "oz": 0.75, "tracked": "Yes"}, {"drink": "White Sangria", "maps_to_master_item": null, "oz": null, "tracked": "No"}, {"drink": "White Tea Shot (Gummy Bear)", "maps_to_master_item": "Zazzo's Vodka", "oz": 1, "tracked": "Yes"}, {"drink": "White Tea Shot (Gummy Bear)", "maps_to_master_item": "Peachtree", "oz": 0.5, "tracked": "Yes"}, {"drink": "Zazzo's Long Island", "maps_to_master_item": "Zazzo's Gin", "oz": 0.25, "tracked": "Yes"}, {"drink": "Zazzo's Long Island", "maps_to_master_item": "Zazzo's Tequila", "oz": 0.25, "tracked": "Yes"}, {"drink": "Zazzo's Long Island", "maps_to_master_item": "Zazzo's Rum", "oz": 0.25, "tracked": "Yes"}, {"drink": "Zazzo's Long Island", "maps_to_master_item": "Zazzo's Vodka", "oz": 0.25, "tracked": "Yes"}, {"drink": "Zazzo's Mama", "maps_to_master_item": "Zazzo's Rum", "oz": 0.75, "tracked": "Yes"}, {"drink": "Zazzo's Mama", "maps_to_master_item": "Rumhaven", "oz": 0.75, "tracked": "Yes"}, {"drink": "Zazzo's Old Fashioned", "maps_to_master_item": "Whistle Pig", "oz": 2, "tracked": "Yes"}, {"drink": "Zazzo's Paloma", "maps_to_master_item": "Zazzo's Tequila", "oz": 1.5, "tracked": "Yes"}, {"drink": "Zazzo's Rootbeer", "maps_to_master_item": "Captain Morgan", "oz": 1.5, "tracked": "Yes"}];
 const SPECIALTY_NAME_FIX = {
     "Expresso Martini": "Espresso Martini",
     "Sambucca": "Sambuca",
@@ -1015,6 +1016,63 @@ function combineSalesSession(session) {
   return combined;
 }
 
+// ───────── Upload safeguards ─────────
+// A report row is a line that starts with a PLU and ends in a number.
+function reportRowSet(text) {
+  const rows = new Set();
+  for (const line of text.split("\n")) {
+    const t = line.trim().replace(/\s+/g, " ");
+    if (/^\d{4,9}\s/.test(t) && /\d$/.test(t)) rows.add(t);
+  }
+  return rows;
+}
+// Two uploaded files are duplicates when their text is identical, or when every row of the
+// smaller one (3 or more rows) already appears in the other (e.g. a standalone report that
+// is already inside the main report). Returns pairs of file names.
+function findDuplicateReports(files) {
+  const dups = [];
+  for (let i = 0; i < files.length; i++) {
+    for (let j = i + 1; j < files.length; j++) {
+      const a = files[i], b = files[j];
+      let same = a.text.replace(/\s+/g, " ").trim() === b.text.replace(/\s+/g, " ").trim();
+      if (!same) {
+        const ra = reportRowSet(a.text), rb = reportRowSet(b.text);
+        const small = ra.size <= rb.size ? ra : rb, big = ra.size <= rb.size ? rb : ra;
+        if (small.size >= 3 && [...small].every(r => big.has(r))) same = true;
+      }
+      if (same) dups.push([a.name, b.name]);
+    }
+  }
+  return dups;
+}
+function reportDateRange(text) {
+  const m = text.match(/([A-Za-z]+day, [A-Za-z]+ \d{1,2}, \d{4}) to ([A-Za-z]+day, [A-Za-z]+ \d{1,2}, \d{4})/);
+  return m ? m[1] + " to " + m[2] : null;
+}
+// Returns { "<date range>": [file names] } when the files do not all cover the same dates, else null.
+function findDateMismatch(files) {
+  const ranges = {};
+  for (const f of files) {
+    const r = reportDateRange(f.text);
+    if (r) (ranges[r] = ranges[r] || []).push(f.name);
+  }
+  return Object.keys(ranges).length > 1 ? ranges : null;
+}
+// Sales that did not land on any Master product: every parser warning (unmapped PLU,
+// missing recipe, ...) plus any sold name that is not a Master product.
+function findUncountedSales(session, masterNames) {
+  const known = new Set(masterNames);
+  const problems = [];
+  for (const entry of session) {
+    for (const f of (entry.result.flags || [])) problems.push(f);
+  }
+  const totals = combineSalesSession(session);
+  for (const [name, qty] of Object.entries(totals)) {
+    if (!known.has(name) && Math.abs(qty) > 0) problems.push('"' + name + '" sold ' + Math.round(qty * 100) / 100 + ' but is not a product in Master');
+  }
+  return problems;
+}
+
 // Sold-total edits are kept as one "manual-edit" entry (always first in the session) that
 // holds the difference between the typed total and what the uploaded reports add up to.
 // Every screen that reads combineSalesSession (and Close Count) therefore sees the corrected
@@ -1104,7 +1162,7 @@ function sumStockForProduct(stock, name) {
 
 /* ───────────────────────── NAV ───────────────────────── */
 /* ───────────────────────── HOME (tile menu) ───────────────────────── */
-const APP_VERSION = "v12.14";
+const APP_VERSION = "v12.18";
 
 function OrganizationScreen({ master, onHome }) {
   const rows = master.map(p => ({ name: p.name, currentLocation: p.locations.join(", ") }));
@@ -1125,7 +1183,7 @@ function OrganizationScreen({ master, onHome }) {
   }
   return h(React.Fragment, null,
     h(ScreenHeader, { onHome, onExportPDF: exportPDF }),
-    h("main", { className: "Page", style: { paddingTop: 20 } },
+    h("main", { className: "Page" },
       h("div", { className: "Card" },
         h("div", { className: "Card-title" }, "Organization", h("span", { className: "CatBadge" }, rows.length + " items")),
         h("table", null,
@@ -1152,7 +1210,7 @@ function CloseoutScreen({ onCloseCount, onHome, archivedCounts, session }) {
   }
   return h(React.Fragment, null,
     h(ScreenHeader, { onHome }),
-    h("main", { className: "Page", style: { paddingTop: 20 } },
+    h("main", { className: "Page" },
       h("div", { className: "Card", style: { textAlign: "center", padding: "32px 20px" } },
         h("div", { style: { fontSize: 15, color: "#555", marginBottom: 20, lineHeight: 1.5 } },
           "This archives Count " + countNumber + " and rolls current stock forward as next week's Last Week. This cannot be undone."
@@ -1176,7 +1234,7 @@ function AnalysisScreen({ onNavigate, onHome }) {
   ];
   return h(React.Fragment, null,
     h(ScreenHeader, { onHome }),
-    h("main", { className: "Page", style: { paddingTop: 20 } },
+    h("main", { className: "Page" },
       h("div", { className: "Login-grid" },
         tiles.map(t => h("div", { key: t.key, className: "LCard", onClick: () => onNavigate(t.key) },
           h("div", { className: "LCard-role" }, t.role),
@@ -1558,10 +1616,12 @@ function SpeedlineScreen({ master, session, setSession, onHome }) {
     const fileList = Array.from(e.target.files);
     const found = {};
     const unrecognized = [];
+    const uploaded = [];
     for (const file of fileList) {
       let text;
       if (file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf")) text = await extractPdfText(file);
       else text = await file.text();
+      uploaded.push({ name: file.name, text });
       const type = detectReportType(text);
       // Previously this line was `found[type] = { text, name: file.name }`, which OVERWRITES
       // any earlier file already detected as this same category - if your Beer report spans
@@ -1576,6 +1636,25 @@ function SpeedlineScreen({ master, session, setSession, onHome }) {
         }
       }
       else unrecognized.push(file.name);
+    }
+    function stopUpload() {
+      setDetectedFiles({});
+      setUnrecognizedNames([]);
+      if (fileRef.current) fileRef.current.value = "";
+    }
+    const dups = findDuplicateReports(uploaded);
+    if (dups.length) {
+      window.alert("DUPLICATE REPORT — nothing was loaded.\n\n" + dups.map(d => d[0] + "  =  " + d[1]).join("\n") + "\n\nThese contain the same data and would be counted twice. Remove the duplicate and upload again.");
+      stopUpload();
+      return;
+    }
+    const mismatch = findDateMismatch(uploaded);
+    if (mismatch) {
+      const lines = Object.entries(mismatch).map(([r, names]) => r + ":\n   " + names.join(", ")).join("\n");
+      if (!window.confirm("These reports do not cover the same dates:\n\n" + lines + "\n\nPress OK to load them anyway, or Cancel to stop and upload the right ones.")) {
+        stopUpload();
+        return;
+      }
     }
     setDetectedFiles(found);
     setUnrecognizedNames(unrecognized);
@@ -2368,6 +2447,12 @@ function App() {
   }, [loaded, stock, received, lastWeek, session, manualCounts]);
 
   async function closeCount() {
+    const uncounted = findUncountedSales(session, ACTIVE_MASTER_DATA.map(p => p.name));
+    if (uncounted.length) {
+      const shown = uncounted.slice(0, 12).join("\n");
+      const more = uncounted.length > 12 ? "\n...and " + (uncounted.length - 12) + " more" : "";
+      if (!window.confirm("These sales were NOT counted toward any product:\n\n" + shown + more + "\n\nPress Cancel to stop and fix them first, or OK to close the count anyway.")) return;
+    }
     const countNumber = archivedCounts.length + 1;
     const dateStart = window.prompt("Date range start for Count " + countNumber + " (e.g. 6/22/26):", "");
     if (dateStart === null) return; // cancelled
